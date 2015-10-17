@@ -1,0 +1,14 @@
+PODS:
+  - Mention (0.1.0)
+
+DEPENDENCIES:
+  - Mention (from `../`)
+
+EXTERNAL SOURCES:
+  Mention:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Mention: fd6983d5293817644eea20421881eb9e51758151
+
+COCOAPODS: 0.38.2

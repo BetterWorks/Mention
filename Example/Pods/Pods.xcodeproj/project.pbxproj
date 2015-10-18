@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		060E843B0C49F2F3B0925248B2837BD7 /* Mention.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 70306B499BDA43731CBB2C575D962AC7 /* Mention.bundle */; };
 		0F254A0EF9D01CF394C27D16112000A3 /* Pods-Mention_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 812A6F997EA527856DBCFB9E24E15241 /* Pods-Mention_Tests-dummy.m */; };
+		214654CA1BD31B2B0054732B /* Mention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654C91BD31B2B0054732B /* Mention.swift */; settings = {ASSET_TAGS = (); }; };
+		214654CD1BD321950054732B /* MentionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654CB1BD321950054732B /* MentionTableViewCell.swift */; settings = {ASSET_TAGS = (); }; };
+		214654CE1BD321950054732B /* MentionTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 214654CC1BD321950054732B /* MentionTableViewCell.xib */; settings = {ASSET_TAGS = (); }; };
 		52A012E0654050F9B4FD9BE96DB77534 /* Mention-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A036760E4751B36A0E5E3AFD58FFE9A /* Mention-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54874FA886A405D1125B7A339A98914E /* Pods-Mention_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F73879DD8936B76EDB074A7259D340C /* Pods-Mention_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8853EBAA77F27AC9574DFB348FD3792E /* Pods-Mention_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 19FBAF400B9CD113510BB459D3BD9DDB /* Pods-Mention_Example-dummy.m */; };
@@ -17,7 +20,6 @@
 		C5EC86A8139AC864D385B33133B25A63 /* Mention-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = BD64282A70C1E67E4098057FA4BAA3EA /* Mention-dummy.m */; };
 		D83180317EAC87DA3FA42A33328C7A91 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB7439C16B48E4172688141681D2A7CD /* Foundation.framework */; };
 		E15966C5C373E8EFD34529C1AB40DA62 /* Pods-Mention_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = ED0EE0717ABD35833B2C6626A9458177 /* Pods-Mention_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F6B5F172B9A552280189E17CA964F4AD /* ReplaceMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C01176006E52CD8EDD7FE63495472A /* ReplaceMe.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,9 @@
 		0F73879DD8936B76EDB074A7259D340C /* Pods-Mention_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Mention_Example-umbrella.h"; sourceTree = "<group>"; };
 		19FBAF400B9CD113510BB459D3BD9DDB /* Pods-Mention_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Mention_Example-dummy.m"; sourceTree = "<group>"; };
 		1FE6A8998E06F795ECA75F03B90985AB /* Pods-Mention_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Mention_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		214654C91BD31B2B0054732B /* Mention.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mention.swift; sourceTree = "<group>"; };
+		214654CB1BD321950054732B /* MentionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MentionTableViewCell.swift; sourceTree = "<group>"; };
+		214654CC1BD321950054732B /* MentionTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MentionTableViewCell.xib; sourceTree = "<group>"; };
 		30018322FA072669FD9989B315840360 /* Pods-Mention_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Mention_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		3A4FDEE608230311514B6A86428DC330 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4190FC52199D4EC6BA4C4FD2DC39AAFD /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -69,7 +74,6 @@
 		93E3B52E9A4C7371BE3BA4AC9ADDA5FA /* Pods-Mention_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Mention_Example-acknowledgements.plist"; sourceTree = "<group>"; };
 		A301D42A3F916A601EDBE76DACB4D6BB /* Pods-Mention_Example-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Mention_Example-resources.sh"; sourceTree = "<group>"; };
 		A3512537758ABE70759C57F174CB012F /* Mention-Private.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Mention-Private.xcconfig"; sourceTree = "<group>"; };
-		A8C01176006E52CD8EDD7FE63495472A /* ReplaceMe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReplaceMe.swift; sourceTree = "<group>"; };
 		AD2547ABA3C05134C04F4454C3D77AC9 /* Mention.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Mention.xcconfig; sourceTree = "<group>"; };
 		B11437A484AC5BED3C1FCCA62440B28C /* Pods-Mention_Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Mention_Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		BA6428E9F66FD5A23C0A2E06ED26CD2F /* Podfile */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -154,7 +158,9 @@
 		564C31DED4F3A6B4F570E25D5D177C33 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				A8C01176006E52CD8EDD7FE63495472A /* ReplaceMe.swift */,
+				214654CB1BD321950054732B /* MentionTableViewCell.swift */,
+				214654CC1BD321950054732B /* MentionTableViewCell.xib */,
+				214654C91BD31B2B0054732B /* Mention.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -391,6 +397,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				214654CE1BD321950054732B /* MentionTableViewCell.xib in Resources */,
 				060E843B0C49F2F3B0925248B2837BD7 /* Mention.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -409,8 +416,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				214654CD1BD321950054732B /* MentionTableViewCell.swift in Sources */,
+				214654CA1BD31B2B0054732B /* Mention.swift in Sources */,
 				C5EC86A8139AC864D385B33133B25A63 /* Mention-dummy.m in Sources */,
-				F6B5F172B9A552280189E17CA964F4AD /* ReplaceMe.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -632,6 +640,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A3512537758ABE70759C57F174CB012F /* Mention-Private.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEFINES_MODULE = YES;
@@ -660,6 +669,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A3512537758ABE70759C57F174CB012F /* Mention-Private.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEFINES_MODULE = YES;

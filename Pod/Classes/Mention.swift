@@ -621,11 +621,11 @@ private class MentionTapHandler<T: UIView where T: AttributedTextContainingView,
         view.addGestureRecognizer(tapRecognizer)
     }
 
-    /**
+     /**
      Called every time the user taps the supplied view. If the user tapped an @mention or a hashtag, the corresponding
      MentionTapHandlerDelegate delegate is called on the delegate property.
 
-     :param: recognizer An instance of UITapGestureRecognizer created in the MentionTapHandler initializer.
+     - parameter recognizer: An instance of UITapGestureRecognizer created in the MentionTapHandler initializer.
      */
     func viewTapped(recognizer: UITapGestureRecognizer) {
         recognizer.cancelsTouchesInView = false

@@ -666,7 +666,7 @@ public class MentionTapHandler: NSObject {
 The container class type is at the discretion of the class or struct that implements CharacterFinder.
 */
 private protocol CharacterFinder {
-    typealias ViewType: UIView
+    typealias ViewType: AttributedTextContainingView
     static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int
 }
 

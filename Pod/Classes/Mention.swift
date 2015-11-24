@@ -119,7 +119,7 @@ public class MentionController<T: UIView where T: AttributedTextContainingView, 
     /**
     Public initializer for MentionController.
 
-    - parameter view:     A `UIView` that conforms to `AttributedTextContainingView`
+    - parameter view:     A `UIView` that conforms to `AttributedTextContainingView` and `CharacterFinder`
     - parameter delegate: An object that conforms to MentionTapHandlerDelegate
 
     - returns: An instance of MentionController

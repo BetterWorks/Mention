@@ -19,61 +19,63 @@ private struct MentionAttributes {
     static let Encoded = "MentionEncodedAttribute"
 }
 
-/**
-*  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
-*  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
-*  Note: MentionController is built to be compatible objective C.
-*/
-class MentionController: NSObject, MentionTapHandlerDelegate {
-    
+///  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
+///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
+///  Note: MentionController is built to be compatible objective C.
+public class MentionController: NSObject, MentionTapHandlerDelegate {
+
     var view: UIView
     weak var delegate: MentionTapHandlerDelegate?
     private var tapHandler: MentionTapHandler!
-    private let mentionDecoder = MentionDecoder()
-    
+    private let mentionDecoder: MentionDecoder
+
     // MARK: Init
-    
-    convenience init(label: UILabel, delegate: MentionTapHandlerDelegate?) {
+
+    public convenience init(label: UILabel, delegate: MentionTapHandlerDelegate?) {
         label.userInteractionEnabled = true
-        self.init(view: label, inputString: label.text, delegate: delegate)
+        let attributedString = label.attributedText ?? NSAttributedString(string: label.text ?? "", attributes: [NSFontAttributeName : label.font, NSForegroundColorAttributeName : label.textColor])
+        self.init(view: label, inputString: attributedString, delegate: delegate)
     }
-    
-    convenience init(textField: UITextField, delegate: MentionTapHandlerDelegate?) {
-        self.init(view: textField, inputString: textField.text, delegate: delegate)
+
+    public convenience init(textField: UITextField, delegate: MentionTapHandlerDelegate?) {
+        let attributedString = textField.attributedText ?? NSAttributedString(string: textField.text ?? "", attributes: [NSFontAttributeName : textField.font!, NSForegroundColorAttributeName : textField.textColor!])
+        self.init(view: textField, inputString: attributedString, delegate: delegate)
     }
-    
-    convenience init(textView: UITextView, delegate: MentionTapHandlerDelegate?) {
-        self.init(view: textView, inputString: textView.text, delegate: delegate)
+
+    public convenience init(textView: UITextView, delegate: MentionTapHandlerDelegate?) {
+
+        let attributedString = textView.attributedText ?? NSAttributedString(string: textView.text, attributes: [NSFontAttributeName : textView.font!, NSForegroundColorAttributeName : textView.textColor!])
+
+        self.init(view: textView, inputString: attributedString, delegate: delegate)
     }
-    
-    private init(view: UIView, inputString: String?, delegate: MentionTapHandlerDelegate?) {
+
+    private init(view: UIView, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
         self.view = view
         self.delegate = delegate
+        self.mentionDecoder = MentionDecoder(attributedString: inputString)
         super.init()
-        
+
         // Decode
-        if let string = inputString {
-            if let attributedStringWithMentions = mentionDecoder.decode(string) {
-                switch view {
-                case let label as UILabel:
-                    label.attributedText = attributedStringWithMentions
-                case let textView as UITextView:
-                    textView.attributedText = attributedStringWithMentions
-                case let textField as UITextField:
-                    textField.attributedText = attributedStringWithMentions
-                default:
-                    print("unsupported view")
-                }
-            }
+        let attributedStringWithMentions = mentionDecoder.decode()
+
+        switch view {
+        case let label as UILabel:
+            label.attributedText = attributedStringWithMentions
+        case let textView as UITextView:
+            textView.attributedText = attributedStringWithMentions
+        case let textField as UITextField:
+            textField.attributedText = attributedStringWithMentions
+        default:
+            print("unsupported view")
         }
-        
+
         // Handle Taps
         tapHandler = MentionTapHandler(view: view, delegate: self)
     }
-    
+
     // MARK: MentionTapHandlerDelegate
-    
-    func userTappedWithId(id: String) {
+
+    public func userTappedWithId(id: String) {
         delegate?.userTappedWithId(id)
     }
 }
@@ -449,70 +451,72 @@ private protocol TagDecoder {
     var pattern: String { get }
     /// The text color for decoded tags
     var tagColor: UIColor { get }
-    func decode(string: NSString) -> NSAttributedString?
+    func decode() -> NSAttributedString
 }
 
 /**
-*  A MentionDecoder instance finds occurences of @mentions in a string and converts them to regular text
-*/
+ *  A MentionDecoder instance finds occurences of @mentions in a string and converts them to regular text
+ */
 struct MentionDecoder: TagDecoder {
-    
-    var pattern = "\\[\\@.+?\\:[0-9]+\\]"
-    var tagColor = UIColor.blueColor()
-    
+
+    var pattern         = "\\[\\@.+?\\:[0-9]+\\]"
+    let tagColor        = UIColor.blueColor()
+    let tagFont         = UIFont.systemFontOfSize(18)
+    let userIdSignifier = ":"
+    let attributedString: NSAttributedString
+
+    init(attributedString: NSAttributedString) {
+        self.attributedString = attributedString
+    }
+
     /**
-    Given a String, MentionDecoder replaces all instances of @mention with an NSAttributedString showing just the user name.
-    The user id is encoded in the MentionAttributes.UserId attribute.
-    The following custom attributes are set on @mention strings:
-    
-    MentionAttribute : true
-    MentionAttributes.UserId: decoded user id as a string
-    
-    :param: string A String that may contain @mention substrings.
-    
-    :returns: An instance of NSAttributedString.
-    */
-    func decode(string: NSString) -> NSAttributedString? {
-        let mutableDecodedString = NSMutableAttributedString(string: string as String)
-        
-        do {
-            let regex = try NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
-            let range = NSRange(location: 0, length: string.length)
-            let matches = regex.matchesInString(string as String, options: .ReportProgress, range: range)
-            
+     Given a String, MentionDecoder replaces all instances of @mention with an NSAttributedString showing just the user name.
+     The user id is encoded in the MentionAttributes.UserId attribute.
+     The following custom attributes are set on @mention strings:
+
+     MentionAttribute : true
+     MentionAttributes.UserId: decoded user id as a string
+
+     - parameter string: A String that may contain @mention substrings.
+
+     - returns: An instance of NSAttributedString.
+     */
+    func decode() -> NSAttributedString {
+        let mutableDecodedString = attributedString.mutableCopy() as! NSMutableAttributedString
+        let string = attributedString.string
+
+        let regex = try? NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
+        let range = NSRange(location: 0, length: string.characters.count)
+        if let matches = regex?.matchesInString(string as String, options: .ReportCompletion, range: range) {
             // keeps track of range changes in mutableDecodedString due to replacements
             var offset = 0
-            
+
             for match in matches {
                 // Isolate the mention
                 var matchRange = match.range
                 matchRange.location += offset
-                let mention = regex.replacementStringForResult(match, inString: mutableDecodedString.string, offset: offset, template: "$0") as NSString
-                
-                // Find the user id signifier
-                let userIdSignifier = ":"
-                let userSignifierRange = mention.rangeOfString(userIdSignifier)
-                
-                // Find the user id
-                let userIdRange = NSRange(location: userSignifierRange.location + 1, length: mention.length - userSignifierRange.location - 2)
-                let userId = mention.substringWithRange(userIdRange)
-                
-                // Strip everything but the user name
-                let userNameRange = NSRange(location: 2, length: userSignifierRange.location - 2)
-                let userName = mention.substringWithRange(userNameRange)
-                
-                // Replace the mention with the user name as an attributed string
-                let attributedMention = NSAttributedString(string: userName, attributes: [MentionAttributes.UserId : userId, NSForegroundColorAttributeName : tagColor])
-                mutableDecodedString.replaceCharactersInRange(matchRange, withAttributedString: attributedMention)
-                
-                // Offset the difference between the length of the replacement string and the original range of the regex match
-                offset += attributedMention.length - matchRange.length
-            }
+                if let mention = regex?.replacementStringForResult(match, inString: mutableDecodedString.string, offset: offset, template: "$0") {
+                    // Find the user id signifier
+                    if let userSignifierRange = mention.rangeOfString(userIdSignifier) {
+                        // Find the user id
+                        let userIdRange = Range(start: userSignifierRange.startIndex.advancedBy(1), end: userSignifierRange.startIndex.advancedBy(userSignifierRange.startIndex.distanceTo(mention.endIndex) - 1))
+                        let userId = mention.substringWithRange(userIdRange)
 
-        } catch {
-            print("could not create regex!")
+                        // Strip everything but the user name
+                        let userNameRange = Range(start: mention.startIndex.advancedBy(2), end: userSignifierRange.startIndex)
+                        let userName = mention.substringWithRange(userNameRange)
+
+                        // Replace the mention with the user name as an attributed string
+                        let attributedMention = NSAttributedString(string: userName, attributes: [MentionAttributes.UserId : userId, NSForegroundColorAttributeName : tagColor, NSFontAttributeName : tagFont])
+                        mutableDecodedString.replaceCharactersInRange(matchRange, withAttributedString: attributedMention)
+
+                        // Offset the difference between the length of the replacement string and the original range of the regex match
+                        offset += attributedMention.length - matchRange.length
+                    }
+                }
+            }
         }
-        
+
         return NSAttributedString(attributedString: mutableDecodedString)
     }
 }
@@ -522,45 +526,43 @@ struct MentionDecoder: TagDecoder {
 /**
 *  MentionTapHandlerDelegate defines functions for handling taps on @mention and #hashtag substrings.
 */
-@objc protocol MentionTapHandlerDelegate {
+public protocol MentionTapHandlerDelegate: class {
     /**
-    This method is called when the user taps an @mention string.
-    
-    :param: id The id encoded in the @mention string.
-    */
+     This method is called when the user taps an @mention string.
+
+     :param: id The id encoded in the @mention string.
+     */
     func userTappedWithId(id: String)
 }
 
-/**
-*  Listens for taps on the supplied view and calls the corresponding MentionTapHandlerDelegate method.
-*  Note: Creates an instance of UITapGestureRecognizer on the supplied UIView.
-*/
-class MentionTapHandler: NSObject {
-    
+/// Listens for taps on the supplied view and calls the corresponding MentionTapHandlerDelegate method.
+/// Note: Creates an instance of UITapGestureRecognizer on the supplied UIView.
+public class MentionTapHandler: NSObject {
+
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?
-    
+
     init(view: UIView, delegate: MentionTapHandlerDelegate) {
         super.init()
         self.delegate = delegate
         tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")
         view.addGestureRecognizer(tapRecognizer)
     }
-    
+
     /**
-    Called every time the user taps the supplied view. If the user tapped an @mention or a hashtag, the corresponding
-    MentionTapHandlerDelegate delegate is called on the delegate property.
-    
-    :param: recognizer An instance of UITapGestureRecognizer created in the MentionTapHandler initializer.
-    */
+     Called every time the user taps the supplied view. If the user tapped an @mention or a hashtag, the corresponding
+     MentionTapHandlerDelegate delegate is called on the delegate property.
+
+     :param: recognizer An instance of UITapGestureRecognizer created in the MentionTapHandler initializer.
+     */
     func viewTapped(recognizer: UITapGestureRecognizer) {
         recognizer.cancelsTouchesInView = false
-        
+
         let view = recognizer.view!
         let location = recognizer.locationInView(view)
         var charIndex: Int?
         var attributedString: NSAttributedString?
-        
+
         switch view {
         case let label as UILabel:
             charIndex = LabelCharacterFinder.indexOfTappedCharacter(inView: label, tapLocation: location)
@@ -574,7 +576,7 @@ class MentionTapHandler: NSObject {
         default:
             print("unsupported view")
         }
-        
+
         if let index = charIndex {
             if let userId = attributedString?.attribute(MentionAttributes.UserId, atIndex: index, effectiveRange: nil) as? String {
                 delegate?.userTappedWithId(userId)
@@ -586,9 +588,10 @@ class MentionTapHandler: NSObject {
 
 // MARK: - CharacterFinder
 
+
 /**
 *  CharacterFinder is a protocol for a class that identifies what character was tapped in the given container of text.
-   The container class type is at the discretion of the class or struct that implements CharacterFinder.
+The container class type is at the discretion of the class or struct that implements CharacterFinder.
 */
 private protocol CharacterFinder {
     typealias ViewType: UIView
@@ -597,25 +600,25 @@ private protocol CharacterFinder {
 
 private struct LabelCharacterFinder: CharacterFinder {
     typealias ViewType = UILabel
-    
+
     /**
-    Finds the character at a given location in a tapped view.
-    
-    :param: view        The view that was tapped. Must be an instance of UILabel.
-    :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
-    
-    :returns: The index of the tapped character.
-    */
+     Finds the character at a given location in a tapped view.
+
+     :param: view        The view that was tapped. Must be an instance of UILabel.
+     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+
+     :returns: The index of the tapped character.
+     */
     static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-        
+
         // UILabel doesn't come with NSTextStorage, NSTextContainer, or NSLayoutManager, so
         // we have to create these manually.
-        
-        let attributedText = view.attributedText!
+
+        let attributedText = view.attributedText ?? NSAttributedString()
         let textStorage = NSTextStorage(attributedString: attributedText)
         let layoutManager = NSLayoutManager()
         textStorage.addLayoutManager(layoutManager)
-        
+
         let textContainer = NSTextContainer(size: view.bounds.size)
         textContainer.lineFragmentPadding = 0
         textContainer.maximumNumberOfLines = view.numberOfLines
@@ -623,63 +626,62 @@ private struct LabelCharacterFinder: CharacterFinder {
         textContainer.layoutManager = layoutManager
 
         layoutManager.addTextContainer(textContainer)
-        layoutManager.textStorage = textStorage
-        
+
         // Find the tapped character
-        
+
         return layoutManager.characterIndexForPoint(tapLocation, inTextContainer: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
     }
 }
 
 private struct TextViewCharacterFinder: CharacterFinder {
     typealias ViewType = UITextView
-    
+
     /**
-    Finds the character at a given location in a tapped view.
-    
-    :param: view        The view that was tapped. Must be an instance of UITextView.
-    :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
-    
-    :returns: The index of the tapped character.
-    */
+     Finds the character at a given location in a tapped view.
+
+     :param: view        The view that was tapped. Must be an instance of UITextView.
+     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+
+     :returns: The index of the tapped character.
+     */
     static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-        
+
         // Location of the tap
-        
+
         var location = tapLocation
         let layoutManager = view.layoutManager
         location.x -= view.textContainerInset.left
         location.y -= view.textContainerInset.top
-        
+
         // Find the tapped character
-        
+
         return layoutManager.characterIndexForPoint(location, inTextContainer: view.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
     }
 }
 
 private struct TextFieldCharacterFinder: CharacterFinder {
     typealias ViewType = UITextField
-    
+
     /**
-    Finds the character at a given location in a tapped view.
-    
-    :param: view        The view that was tapped. Must be an instance of UITextField.
-    :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
-    
-    :returns: The index of the tapped character.
-    */
+     Finds the character at a given location in a tapped view.
+
+     :param: view        The view that was tapped. Must be an instance of UITextField.
+     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+
+     :returns: The index of the tapped character.
+     */
     static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-        
+
         // UITextField doesn't come with NSTextStorage, NSTextContainer, or NSLayoutManager, so
         // we have to create these manually.
-        
+
         var charIndex = -1
-        
+
         if let attributedText = view.attributedText {
             let textStorage = NSTextStorage(attributedString: attributedText)
             let layoutManager = NSLayoutManager()
             textStorage.addLayoutManager(layoutManager)
-            
+
             let textContainer = NSTextContainer(size: view.bounds.size)
             textContainer.lineFragmentPadding = 0
             textContainer.layoutManager = layoutManager

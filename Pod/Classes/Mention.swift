@@ -13,7 +13,7 @@ import Foundation
 /**
 *  The NSAttributesString attributes used to encode and decode @mentions
 */
-struct MentionAttributes {
+private struct MentionAttributes {
     static let UserId  = "MentionUserIdAttribute"
     static let Name    = "MentionNameAttribute"
     static let Encoded = "MentionEncodedAttribute"

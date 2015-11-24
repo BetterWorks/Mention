@@ -146,7 +146,6 @@ class TextViewMentionComposer: NSObject {
     private let MentionCellIdentifier = "MentionCell"
     private let TextColor = UIColor.blueColor()
     
-    
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
     private var recentCharacterRange: NSRange = NSRange(location: 0, length: 0)

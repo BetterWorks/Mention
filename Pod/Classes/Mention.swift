@@ -107,11 +107,11 @@ extension UITextView: AttributedTextContainingView {
 ///  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
 ///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
 ///  Note: MentionController is built to be compatible objective C.
-public class MentionController: NSObject, MentionTapHandlerDelegate {
+public class MentionController<T: UIView where T: AttributedTextContainingView, T: CharacterFinder>: NSObject, MentionTapHandlerDelegate {
 
     var view: AttributedTextContainingView
     weak var delegate: MentionTapHandlerDelegate?
-    private var tapHandler: MentionTapHandler!
+    private var tapHandler: MentionTapHandler<T>!
     private let mentionDecoder: MentionDecoder
 
     // MARK: Init
@@ -124,12 +124,12 @@ public class MentionController: NSObject, MentionTapHandlerDelegate {
 
     - returns: An instance of MentionController
     */
-    public convenience init<T: UIView where T: AttributedTextContainingView>(view: T, delegate: MentionTapHandlerDelegate?) {
+    public convenience init(view: T, delegate: MentionTapHandlerDelegate?) {
         let attributedString = view.m_attributedText ?? NSAttributedString(string: view.m_text, attributes: [NSFontAttributeName : view.m_font, NSForegroundColorAttributeName : view.m_textColor])
         self.init(view: view, inputString: attributedString, delegate: delegate)
     }
 
-    private init<T: UIView where T: AttributedTextContainingView>(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
+    private init(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
         self.view = view
         self.delegate = delegate
         self.mentionDecoder = MentionDecoder(attributedString: inputString)
@@ -609,7 +609,7 @@ public protocol MentionTapHandlerDelegate: class {
 
 /// Listens for taps on the supplied view and calls the corresponding MentionTapHandlerDelegate method.
 /// Note: Creates an instance of UITapGestureRecognizer on the supplied UIView.
-public class MentionTapHandler: NSObject {
+public class MentionTapHandler<T: UIView where T: AttributedTextContainingView, T: CharacterFinder>: NSObject {
 
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?
@@ -630,30 +630,15 @@ public class MentionTapHandler: NSObject {
     func viewTapped(recognizer: UITapGestureRecognizer) {
         recognizer.cancelsTouchesInView = false
 
-        let view = recognizer.view!
+        guard let view = recognizer.view as? T else { return }
+
         let location = recognizer.locationInView(view)
-        var charIndex: Int?
-        var attributedString: NSAttributedString?
+        let charIndex = view.indexOfTappedCharacter(location)
+        let attributedString = view.m_attributedText
 
-        switch view {
-        case let label as UILabel:
-            charIndex = LabelCharacterFinder.indexOfTappedCharacter(inView: label, tapLocation: location)
-            attributedString = label.attributedText
-        case let textView as UITextView:
-            charIndex = TextViewCharacterFinder.indexOfTappedCharacter(inView: textView, tapLocation: location)
-            attributedString = textView.attributedText
-        case let textField as UITextField:
-            charIndex = TextFieldCharacterFinder.indexOfTappedCharacter(inView: textField, tapLocation: location)
-            attributedString = textField.attributedText
-        default:
-            print("unsupported view")
-        }
-
-        if let index = charIndex {
-            if let userId = attributedString?.attribute(MentionAttributes.UserId, atIndex: index, effectiveRange: nil) as? String {
-                delegate?.userTappedWithId(userId)
-                recognizer.cancelsTouchesInView = true
-            }
+        if let userId = attributedString?.attribute(MentionAttributes.UserId, atIndex: charIndex, effectiveRange: nil) as? String {
+            delegate?.userTappedWithId(userId)
+            recognizer.cancelsTouchesInView = true
         }
     }
 }
@@ -665,36 +650,31 @@ public class MentionTapHandler: NSObject {
 *  CharacterFinder is a protocol for a class that identifies what character was tapped in the given container of text.
 The container class type is at the discretion of the class or struct that implements CharacterFinder.
 */
-private protocol CharacterFinder {
-    typealias ViewType: AttributedTextContainingView
-    static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int
+public protocol CharacterFinder {
+    func indexOfTappedCharacter(tapLocation: CGPoint) -> Int
 }
 
-private struct LabelCharacterFinder: CharacterFinder {
-    typealias ViewType = UILabel
-
+extension UILabel: CharacterFinder {
     /**
      Finds the character at a given location in a tapped view.
 
-     :param: view        The view that was tapped. Must be an instance of UILabel.
-     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+     - parameter tapLocation: The location of the tap. Usually derived from a gesture recognizer.
 
-     :returns: The index of the tapped character.
+     - returns: The index of the tapped character.
      */
-    static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-
+    public func indexOfTappedCharacter(tapLocation: CGPoint) -> Int {
         // UILabel doesn't come with NSTextStorage, NSTextContainer, or NSLayoutManager, so
         // we have to create these manually.
 
-        let attributedText = view.attributedText ?? NSAttributedString()
+        let attributedText = m_attributedText ?? NSAttributedString()
         let textStorage = NSTextStorage(attributedString: attributedText)
         let layoutManager = NSLayoutManager()
         textStorage.addLayoutManager(layoutManager)
 
-        let textContainer = NSTextContainer(size: view.bounds.size)
+        let textContainer = NSTextContainer(size: bounds.size)
         textContainer.lineFragmentPadding = 0
-        textContainer.maximumNumberOfLines = view.numberOfLines
-        textContainer.lineBreakMode = view.lineBreakMode
+        textContainer.maximumNumberOfLines = numberOfLines
+        textContainer.lineBreakMode = lineBreakMode
         textContainer.layoutManager = layoutManager
 
         layoutManager.addTextContainer(textContainer)
@@ -705,67 +685,58 @@ private struct LabelCharacterFinder: CharacterFinder {
     }
 }
 
-private struct TextViewCharacterFinder: CharacterFinder {
-    typealias ViewType = UITextView
-
+extension UITextView: CharacterFinder {
     /**
      Finds the character at a given location in a tapped view.
 
-     :param: view        The view that was tapped. Must be an instance of UITextView.
-     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+     - parameter tapLocation: The location of the tap. Usually derived from a gesture recognizer.
 
-     :returns: The index of the tapped character.
+     - returns: The index of the tapped character.
      */
-    static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-
+    public func indexOfTappedCharacter(tapLocation: CGPoint) -> Int {
         // Location of the tap
 
         var location = tapLocation
-        let layoutManager = view.layoutManager
-        location.x -= view.textContainerInset.left
-        location.y -= view.textContainerInset.top
+        location.x -= textContainerInset.left
+        location.y -= textContainerInset.top
 
         // Find the tapped character
 
-        return layoutManager.characterIndexForPoint(location, inTextContainer: view.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
+        return layoutManager.characterIndexForPoint(location, inTextContainer: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
     }
 }
 
-private struct TextFieldCharacterFinder: CharacterFinder {
-    typealias ViewType = UITextField
-
+extension UITextField: CharacterFinder {
     /**
      Finds the character at a given location in a tapped view.
 
-     :param: view        The view that was tapped. Must be an instance of UITextField.
-     :param: tapLocation The location of the tap. Usually derived from a gesture recognizer.
+     - parameter tapLocation: The location of the tap. Usually derived from a gesture recognizer.
 
-     :returns: The index of the tapped character.
+     - returns: The index of the tapped character.
      */
-    static func indexOfTappedCharacter(inView view: ViewType, tapLocation: CGPoint) -> Int {
-
+    public func indexOfTappedCharacter(tapLocation: CGPoint) -> Int {
         // UITextField doesn't come with NSTextStorage, NSTextContainer, or NSLayoutManager, so
         // we have to create these manually.
 
         var charIndex = -1
 
-        if let attributedText = view.attributedText {
+        if let attributedText = m_attributedText {
             let textStorage = NSTextStorage(attributedString: attributedText)
             let layoutManager = NSLayoutManager()
             textStorage.addLayoutManager(layoutManager)
 
-            let textContainer = NSTextContainer(size: view.bounds.size)
+            let textContainer = NSTextContainer(size: bounds.size)
             textContainer.lineFragmentPadding = 0
             textContainer.layoutManager = layoutManager
-            
+
             layoutManager.addTextContainer(textContainer)
             layoutManager.textStorage = textStorage
-            
+
             // Find the tapped character
-            
+
             charIndex = layoutManager.characterIndexForPoint(tapLocation, inTextContainer: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
         }
-        
+
         return charIndex
     }
 }

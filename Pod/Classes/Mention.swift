@@ -19,37 +19,117 @@ private struct MentionAttributes {
     static let Encoded = "MentionEncodedAttribute"
 }
 
+/**
+ *  AttributedTextContainingView provides a single interface for text containing views
+ */
+public protocol AttributedTextContainingView {
+    var m_text: String { get }
+    var m_attributedText: NSAttributedString? { get set }
+    var m_font: UIFont { get }
+    var m_textColor: UIColor { get }
+}
+
+extension UILabel: AttributedTextContainingView {
+    public var m_text: String {
+        get {
+            return text ?? ""
+        }
+    }
+
+    public var m_attributedText: NSAttributedString? {
+        set {
+            attributedText = newValue
+        }
+        get {
+            return attributedText
+        }
+    }
+
+    public var m_font: UIFont {
+        return font
+    }
+
+    public var m_textColor: UIColor {
+        return textColor
+    }
+}
+
+extension UITextField: AttributedTextContainingView {
+    public var m_text: String {
+        get {
+            return self.text ?? ""
+        }
+    }
+
+    public var m_attributedText: NSAttributedString? {
+        set {
+            self.attributedText = newValue
+        }
+        get {
+            return self.attributedText
+        }
+    }
+
+    public var m_font: UIFont {
+        return font!
+    }
+
+    public var m_textColor: UIColor {
+        return textColor!
+    }
+}
+
+extension UITextView: AttributedTextContainingView {
+    public var m_text: String {
+        get {
+            return self.text ?? ""
+        }
+    }
+
+    public var m_attributedText: NSAttributedString? {
+        set {
+            self.attributedText = newValue
+        }
+        get {
+            return self.attributedText
+        }
+    }
+
+    public var m_font: UIFont {
+        return font!
+    }
+
+    public var m_textColor: UIColor {
+        return textColor!
+    }
+}
+
 ///  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
 ///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
 ///  Note: MentionController is built to be compatible objective C.
 public class MentionController: NSObject, MentionTapHandlerDelegate {
 
-    var view: UIView
+    var view: AttributedTextContainingView
     weak var delegate: MentionTapHandlerDelegate?
     private var tapHandler: MentionTapHandler!
     private let mentionDecoder: MentionDecoder
 
     // MARK: Init
 
-    public convenience init(label: UILabel, delegate: MentionTapHandlerDelegate?) {
-        label.userInteractionEnabled = true
-        let attributedString = label.attributedText ?? NSAttributedString(string: label.text ?? "", attributes: [NSFontAttributeName : label.font, NSForegroundColorAttributeName : label.textColor])
-        self.init(view: label, inputString: attributedString, delegate: delegate)
+    /**
+    Public initializer for MentionController.
+
+    - parameter view:     A `UIView` that conforms to `AttributedTextContainingView`
+    - parameter delegate: An object that conforms to MentionTapHandlerDelegate
+
+    - returns: An instance of MentionController
+    */
+    public convenience init<T: UIView where T: AttributedTextContainingView>(view: T, delegate: MentionTapHandlerDelegate?) {
+        let attributedString = view.m_attributedText ?? NSAttributedString(string: view.m_text, attributes: [NSFontAttributeName : view.m_font, NSForegroundColorAttributeName : view.m_textColor])
+        self.init(view: view, inputString: attributedString, delegate: delegate)
     }
 
-    public convenience init(textField: UITextField, delegate: MentionTapHandlerDelegate?) {
-        let attributedString = textField.attributedText ?? NSAttributedString(string: textField.text ?? "", attributes: [NSFontAttributeName : textField.font!, NSForegroundColorAttributeName : textField.textColor!])
-        self.init(view: textField, inputString: attributedString, delegate: delegate)
-    }
-
-    public convenience init(textView: UITextView, delegate: MentionTapHandlerDelegate?) {
-
-        let attributedString = textView.attributedText ?? NSAttributedString(string: textView.text, attributes: [NSFontAttributeName : textView.font!, NSForegroundColorAttributeName : textView.textColor!])
-
-        self.init(view: textView, inputString: attributedString, delegate: delegate)
-    }
-
-    private init(view: UIView, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
+    private init<T: UIView where T: AttributedTextContainingView>(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
         self.view = view
         self.delegate = delegate
         self.mentionDecoder = MentionDecoder(attributedString: inputString)
@@ -58,16 +138,8 @@ public class MentionController: NSObject, MentionTapHandlerDelegate {
         // Decode
         let attributedStringWithMentions = mentionDecoder.decode()
 
-        switch view {
-        case let label as UILabel:
-            label.attributedText = attributedStringWithMentions
-        case let textView as UITextView:
-            textView.attributedText = attributedStringWithMentions
-        case let textField as UITextField:
-            textField.attributedText = attributedStringWithMentions
-        default:
-            print("unsupported view")
-        }
+        // Set Attributed Text
+        self.view.m_attributedText = attributedStringWithMentions
 
         // Handle Taps
         tapHandler = MentionTapHandler(view: view, delegate: self)
@@ -542,7 +614,7 @@ public class MentionTapHandler: NSObject {
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?
 
-    init(view: UIView, delegate: MentionTapHandlerDelegate) {
+    init<T: UIView where T: AttributedTextContainingView>(view: T, delegate: MentionTapHandlerDelegate) {
         super.init()
         self.delegate = delegate
         tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")

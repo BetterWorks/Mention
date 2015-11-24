@@ -518,7 +518,7 @@ extension TextViewMentionComposer: UITableViewDataSource, UITableViewDelegate {
 /**
 *  A protocol for classes or structs that decode @mentions, tags, or more.
 */
-private protocol TagDecoder {
+public protocol TagDecoder {
     /// Typically a regex pattern for your tag
     var pattern: String { get }
     /// The text color for decoded tags

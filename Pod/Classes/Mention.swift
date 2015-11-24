@@ -645,7 +645,6 @@ private class MentionTapHandler<T: UIView where T: AttributedTextContainingView,
 
 // MARK: - CharacterFinder
 
-
 /**
 *  CharacterFinder is a protocol for a class that identifies what character was tapped in the given container of text.
 The container class type is at the discretion of the class or struct that implements CharacterFinder.

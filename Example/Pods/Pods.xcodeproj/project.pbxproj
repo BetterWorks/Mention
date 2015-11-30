@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		060E843B0C49F2F3B0925248B2837BD7 /* Mention.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 70306B499BDA43731CBB2C575D962AC7 /* Mention.bundle */; };
 		0F254A0EF9D01CF394C27D16112000A3 /* Pods-Mention_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 812A6F997EA527856DBCFB9E24E15241 /* Pods-Mention_Tests-dummy.m */; };
-		214654CA1BD31B2B0054732B /* Mention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654C91BD31B2B0054732B /* Mention.swift */; settings = {ASSET_TAGS = (); }; };
-		214654CD1BD321950054732B /* MentionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654CB1BD321950054732B /* MentionTableViewCell.swift */; settings = {ASSET_TAGS = (); }; };
-		214654CE1BD321950054732B /* MentionTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 214654CC1BD321950054732B /* MentionTableViewCell.xib */; settings = {ASSET_TAGS = (); }; };
+		214654CA1BD31B2B0054732B /* Mention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654C91BD31B2B0054732B /* Mention.swift */; };
+		214654CD1BD321950054732B /* MentionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214654CB1BD321950054732B /* MentionTableViewCell.swift */; };
+		214654CE1BD321950054732B /* MentionTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 214654CC1BD321950054732B /* MentionTableViewCell.xib */; };
 		52A012E0654050F9B4FD9BE96DB77534 /* Mention-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A036760E4751B36A0E5E3AFD58FFE9A /* Mention-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54874FA886A405D1125B7A339A98914E /* Pods-Mention_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F73879DD8936B76EDB074A7259D340C /* Pods-Mention_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8853EBAA77F27AC9574DFB348FD3792E /* Pods-Mention_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 19FBAF400B9CD113510BB459D3BD9DDB /* Pods-Mention_Example-dummy.m */; };
@@ -363,7 +363,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0710;
 			};
 			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -516,6 +516,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Pods_Mention_Example;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -546,6 +547,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Pods_Mention_Example;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -573,6 +575,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -626,6 +629,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Pods_Mention_Tests;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -655,6 +659,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Mention/Mention.modulemap";
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Mention;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -684,6 +689,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Mention/Mention.modulemap";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Mention;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -713,6 +719,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Pods_Mention_Tests;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MentionTableViewCell: UITableViewCell {
+class MentionTableViewCell: UITableViewCell, MentionUserCell {
 
     @IBOutlet private weak var userNameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!

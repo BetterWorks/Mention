@@ -22,7 +22,7 @@ private struct MentionAttributes {
 /**
  *  AttributedTextContainingView provides a single interface for text containing views
  */
-public protocol AttributedTextContainingView {
+public protocol AttributedTextContainingView: CharacterFinder {
     var m_text: String { get }
     var m_attributedText: NSAttributedString? { get set }
     var m_font: UIFont { get }
@@ -116,7 +116,7 @@ extension AttributedTextContainingView {
 ///  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
 ///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
 ///  Note: MentionController is built to be compatible objective C.
-public class MentionController<T: UIView where T: AttributedTextContainingView, T: CharacterFinder>: NSObject, MentionTapHandlerDelegate {
+public class MentionController<T: UIView where T: AttributedTextContainingView>: NSObject, MentionTapHandlerDelegate {
 
     var view: AttributedTextContainingView
     weak var delegate: MentionTapHandlerDelegate?
@@ -772,7 +772,7 @@ public protocol MentionTapHandlerDelegate: class {
 
 /// Listens for taps on the supplied view and calls the corresponding MentionTapHandlerDelegate method.
 /// Note: Creates an instance of UITapGestureRecognizer on the supplied UIView.
-private class MentionTapHandler<T: UIView where T: AttributedTextContainingView, T: CharacterFinder>: NSObject {
+private class MentionTapHandler<T: UIView where T: AttributedTextContainingView>: NSObject {
 
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?

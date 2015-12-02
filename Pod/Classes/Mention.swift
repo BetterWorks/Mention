@@ -31,6 +31,8 @@ public protocol AttributedTextContainingView: CharacterFinder {
 
 public protocol ComposableAttributedTextContainingView: AttributedTextContainingView, UITextInputTraits, UITextInput {}
 
+public var MentionRegexString = "\\@[^\\@.+]+"
+
 extension UILabel: AttributedTextContainingView {
     public var m_text: String {
         get {
@@ -276,9 +278,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private func mentionQuery(fromString string: NSString) -> NSString? {
         var query: NSString?
 
-        let pattern = "\\@[^\\@.+]+"
         do {
-            let regex = try NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
+            let regex = try NSRegularExpression(pattern: MentionRegexString, options: .CaseInsensitive)
 
             let range = NSRange(location: 0, length: string.length)
 

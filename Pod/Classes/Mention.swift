@@ -33,8 +33,8 @@ public protocol ComposableAttributedTextContainingView: AttributedTextContaining
     var m_autoCorrectionType: UITextAutocorrectionType { get set }
 }
 
-public var MentionRegexString = "\\@[^\\@.+]+"
-public var MentionColor       = UIColor.blueColor()
+public var MentionCharacter: Character = "@"
+public var MentionColor                = UIColor.blueColor()
 
 extension UILabel: AttributedTextContainingView {
     public var m_text: String {
@@ -217,6 +217,9 @@ public class MentionUser: NSObject {
 public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UIGestureRecognizerDelegate, UITableViewDelegate, UITableViewDataSource {
 
     private let MentionCellIdentifier = "MentionCellReuseIdentifier"
+    private var MentionRegexString: String {
+        return "\\\(MentionCharacter)[^\\\(MentionCharacter).+]+"
+    }
 
     var view: T?
     var tableView: UITableView?

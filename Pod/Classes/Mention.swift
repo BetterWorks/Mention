@@ -249,6 +249,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         tapRecognizer.cancelsTouchesInView = false
         tapRecognizer.delaysTouchesEnded = false
         tableView.addGestureRecognizer(tapRecognizer)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged:", name: UITextFieldTextDidChangeNotification, object: view)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged:", name: UITextViewTextDidChangeNotification, object: view)
     }
 
     // MARK: UITableViewDataSource
@@ -390,6 +392,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private func refreshTextView() {
         view?.resignFirstResponder()
         view?.becomeFirstResponder()
+    }
+
+    func textChanged(notification: NSNotification) {
+        print("text changed!")
     }
 
 }

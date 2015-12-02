@@ -234,7 +234,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         return ids
     }
 
-    init<U: UITableViewCell where U: MentionUserCell>(view: T, searchResultsTableView tableView: UITableView, delegate: MentionComposerDelegate?, cellClass: U.Type?) {
+    public init(view: T, searchResultsTableView tableView: UITableView, delegate: MentionComposerDelegate?) {
         self.view = view
         self.view?.configureDefaultAttributedText()
         self.tableView = tableView
@@ -243,7 +243,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         super.init()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.registerClass(cellClass ?? MentionTableViewCell.self, forCellReuseIdentifier: MentionCellIdentifier)
+        tableView.registerClass(MentionTableViewCell.self, forCellReuseIdentifier: MentionCellIdentifier)
         tapRecognizer = UITapGestureRecognizer(target: self, action: "tableViewTapped:")
         tapRecognizer.delegate = self
         tapRecognizer.cancelsTouchesInView = false
@@ -263,6 +263,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         cell.mentionUser = user
 
         return cell as! UITableViewCell
+    }
+
+    public func setCellClass<U: UITableViewCell where U: MentionUserCell>(cellClass: U.Type) {
+        tableView?.registerClass(cellClass, forCellReuseIdentifier: MentionCellIdentifier)
     }
 
     // MARK: Private methods
@@ -398,7 +402,7 @@ public protocol MentionUserCell {
 *  The primary purpose MentionComposerDelegate is to provide the list of users matching an @mention query.
 *  Because TextViewMentionComposer relies on the UITextViewDelegate callbacks, it forwards all of them onto the MentionComposerDelegate.
 */
-@objc protocol MentionComposerDelegate {
+@objc public protocol MentionComposerDelegate {
    
     func usersMatchingQuery(searchQuery query: String) -> [MentionUser]
     

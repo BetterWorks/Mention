@@ -31,6 +31,7 @@ public protocol AttributedTextContainingView: CharacterFinder {
 
 public protocol ComposableAttributedTextContainingView: AttributedTextContainingView, UITextInputTraits, UITextInput {
     var m_autoCorrectionType: UITextAutocorrectionType { get set }
+    var m_typingAttributes: [String : AnyObject]? { get set }
 }
 
 public var MentionCharacter: Character = "@"
@@ -90,7 +91,16 @@ extension UITextField: ComposableAttributedTextContainingView {
             return autocorrectionType
         }
         set {
-            autocorrectionType = m_autoCorrectionType
+            autocorrectionType = newValue
+        }
+    }
+
+    public var m_typingAttributes: [String : AnyObject]? {
+        get {
+            return typingAttributes
+        }
+        set {
+            typingAttributes = newValue
         }
     }
 }
@@ -124,7 +134,16 @@ extension UITextView: ComposableAttributedTextContainingView {
             return autocorrectionType
         }
         set {
-            autocorrectionType = m_autoCorrectionType
+            autocorrectionType = newValue
+        }
+    }
+
+    public var m_typingAttributes: [String : AnyObject]? {
+        get {
+            return typingAttributes
+        }
+        set {
+            typingAttributes = newValue!
         }
     }
 }
@@ -366,7 +385,9 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let mutableEncodedString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
         mutableEncodedString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: mutableEncodedString.length))
         text.replaceCharactersInRange(mentionRange!, withAttributedString: mutableEncodedString)
+        let typingAttributes = view?.m_typingAttributes
         setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
+        view?.m_typingAttributes = typingAttributes
         delegate?.userDidComposeMention?()
     }
 

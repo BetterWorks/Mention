@@ -247,6 +247,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalAutoCorrectionType: UITextAutocorrectionType!
     private var userNameMatches: [MentionUser]?
+    private var previousCharacterCount = 0
     private var recentCharacterRange: NSRange {
         guard let
             beginning = view?.beginningOfDocument,
@@ -302,8 +303,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         tapRecognizer.cancelsTouchesInView = false
         tapRecognizer.delaysTouchesEnded = false
         tableView.addGestureRecognizer(tapRecognizer)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged:", name: UITextFieldTextDidChangeNotification, object: view)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged:", name: UITextViewTextDidChangeNotification, object: view)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextFieldTextDidChangeNotification, object: view)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextViewTextDidChangeNotification, object: view)
     }
 
     // MARK: UITableViewDataSource
@@ -330,7 +331,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! MentionTableViewCell
         if let user = cell.mentionUser {
             injectMention(forUser: user)
-            userNameMatches?.removeAll(keepCapacity: false)
+            userNameMatches = nil
             refreshTableView()
         }
 
@@ -374,6 +375,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             else { return }
 
         view?.selectedTextRange = view?.textRangeFromPosition(position, toPosition: position)
+        textChanged()
     }
 
     private func injectMention(forUser user: MentionUser) {
@@ -413,7 +415,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         guard let attributedText = view?.m_attributedText else { return }
         let mutableText = NSMutableAttributedString(attributedString: attributedText)
         mutableText.deleteCharactersInRange(range)
-        self.setAttributedText(mutableText, cursorLocation: range.location)
+        setAttributedText(mutableText, cursorLocation: range.location)
     }
 
     private func undoMention(inRange range: NSRange) {
@@ -423,7 +425,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         mutableText.removeAttribute(MentionAttributes.Name, range: range)
         mutableText.removeAttribute(MentionAttributes.UserId, range: range)
         mutableText.removeAttribute(NSForegroundColorAttributeName, range: range)
-        self.setAttributedText(mutableText, cursorLocation: recentCharacterRange.location)
+        setAttributedText(mutableText, cursorLocation: recentCharacterRange.location)
     }
 
     private func refreshTableView() {
@@ -459,8 +461,13 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         view?.selectedTextRange = selectedRange
     }
 
-    func textChanged(notification: NSNotification) {
+    func textChanged() {
         guard let text = view?.m_text else { return }
+
+        let deleting = view?.m_attributedText?.string.characters.count < previousCharacterCount
+        if let range = rangeOfMention(atIndex: recentCharacterRange.location) {
+            deleting ? deleteMention(inRange: range) : undoMention(inRange: range)
+        }
 
         if let query = mentionQuery(fromString: text) {
             if let userNames = delegate?.usersMatchingQuery(searchQuery: query as String) {
@@ -484,6 +491,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             view?.m_autoCorrectionType = originalAutoCorrectionType
             refreshTextView()
         }
+
+        previousCharacterCount = (view?.m_attributedText?.string.characters.count)!
     }
 
     // MARK: UITextViewDelegate

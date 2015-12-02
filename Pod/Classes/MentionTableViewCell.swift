@@ -26,11 +26,6 @@ class MentionTableViewCell: UITableViewCell, MentionUserCell {
         reset()
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        reset()
-    }
-    
     func reset() {
         userNameLabel?.text = nil
     }

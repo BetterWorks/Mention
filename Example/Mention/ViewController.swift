@@ -21,9 +21,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        textFieldMentionComposer = MentionComposer<UITextField>(view: textField, searchResultsTableView: tableView, delegate: nil)
-        textViewMentionComposer = MentionComposer<UITextView>(view: textView, searchResultsTableView: tableView, delegate: nil)
+        textFieldMentionComposer = MentionComposer<UITextField>(view: textField, searchResultsTableView: tableView, delegate: self)
+//        textViewMentionComposer = MentionComposer<UITextView>(view: textView, searchResultsTableView: tableView, delegate: self)
     }
 
+}
+
+extension ViewController: MentionComposerDelegate {
+    func usersMatchingQuery(searchQuery query: String) -> [MentionUser] {
+        return [MentionUser(name: "test user", id: 0, imageURL: nil)]
+    }
 }
 

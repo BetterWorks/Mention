@@ -29,9 +29,12 @@ public protocol AttributedTextContainingView: CharacterFinder {
     var m_textColor: UIColor { get }
 }
 
-public protocol ComposableAttributedTextContainingView: AttributedTextContainingView, UITextInputTraits, UITextInput {}
+public protocol ComposableAttributedTextContainingView: AttributedTextContainingView, UITextInputTraits, UITextInput {
+    var m_autoCorrectionType: UITextAutocorrectionType { get set }
+}
 
 public var MentionRegexString = "\\@[^\\@.+]+"
+public var MentionColor       = UIColor.blueColor()
 
 extension UILabel: AttributedTextContainingView {
     public var m_text: String {
@@ -81,6 +84,15 @@ extension UITextField: ComposableAttributedTextContainingView {
     public var m_textColor: UIColor {
         return textColor!
     }
+
+    public var m_autoCorrectionType: UITextAutocorrectionType {
+        get {
+            return autocorrectionType
+        }
+        set {
+            autocorrectionType = m_autoCorrectionType
+        }
+    }
 }
 
 extension UITextView: ComposableAttributedTextContainingView {
@@ -105,6 +117,15 @@ extension UITextView: ComposableAttributedTextContainingView {
 
     public var m_textColor: UIColor {
         return textColor!
+    }
+
+    public var m_autoCorrectionType: UITextAutocorrectionType {
+        get {
+            return autocorrectionType
+        }
+        set {
+            autocorrectionType = m_autoCorrectionType
+        }
     }
 }
 
@@ -169,17 +190,16 @@ public class MentionController<T: UIView where T: AttributedTextContainingView>:
 *  MentionUser is a lightweight, generic model object intended to be the primary way of 
 *  providing MentionComposer classes with a list of users and their attributes.
 */
-@objc public class MentionUser: NSObject {
+public class MentionUser: NSObject {
     
-    let name: String
-    let id: Int
-    let imageURL: String?
+    public let name: String
+    public let id: Int
+    public let imageURL: String?
     
-    init(name: String, id: Int, imageURL: String?) {
+    public init(name: String, id: Int, imageURL: String?) {
         self.name = name
         self.id = id
         self.imageURL = imageURL
-        super.init()
     }
     
     func encodedAttributedString() -> NSAttributedString {
@@ -203,9 +223,18 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     var delegate: MentionComposerDelegate?
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
-    private var recentCharacterRange: NSRange = NSRange(location: 0, length: 0)
     private let originalAutoCorrectionType: UITextAutocorrectionType!
-    var userNameMatches = [MentionUser]()
+    private var userNameMatches: [MentionUser]?
+    private var recentCharacterRange: NSRange {
+        guard let
+            beginning = view?.beginningOfDocument,
+            selectedRange = view?.selectedTextRange,
+            location = view?.offsetFromPosition(beginning, toPosition: selectedRange.start),
+            length = view?.offsetFromPosition(selectedRange.start, toPosition: selectedRange.end)
+            else { return NSRange(location: 0, length: 0) }
+
+        return NSRange(location: location - 1, length: length + 1)
+    }
 
     /// Returns the text encoded for the API
     var encodedText: String? {
@@ -245,7 +274,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         super.init()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.registerClass(MentionTableViewCell.self, forCellReuseIdentifier: MentionCellIdentifier)
+        tableView.registerNib(UINib(nibName: "MentionTableViewCell", bundle: NSBundle(forClass: MentionTableViewCell.self)), forCellReuseIdentifier: MentionCellIdentifier)
         tapRecognizer = UITapGestureRecognizer(target: self, action: "tableViewTapped:")
         tapRecognizer.delegate = self
         tapRecognizer.cancelsTouchesInView = false
@@ -258,12 +287,12 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     // MARK: UITableViewDataSource
 
     public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userNameMatches.count
+        return userNameMatches?.count ?? 0
     }
 
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as! MentionUserCell
-        let user = userNameMatches[indexPath.row]
+        let user = userNameMatches?[indexPath.row]
         cell.mentionUser = user
 
         return cell as! UITableViewCell
@@ -271,6 +300,19 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     public func setCellClass<U: UITableViewCell where U: MentionUserCell>(cellClass: U.Type) {
         tableView?.registerClass(cellClass, forCellReuseIdentifier: MentionCellIdentifier)
+    }
+
+    // MARK: UTableViewDelegate
+
+    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let cell = tableView.cellForRowAtIndexPath(indexPath) as! MentionTableViewCell
+        if let user = cell.mentionUser {
+            injectMention(forUser: user)
+            userNameMatches?.removeAll(keepCapacity: false)
+            refreshTableView()
+        }
+
+        view?.becomeFirstResponder()
     }
 
     // MARK: Private methods
@@ -287,6 +329,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
             for match in matches {
                 // Match must be contained in the text the user most recently changed
+                view?.selectedTextRange
                 if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
                     let queryLength = recentCharacterRange.location - match.range.location + 1
                     mentionRange = NSRange(location: match.range.location, length: queryLength)
@@ -308,9 +351,13 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     private func injectMention(forUser user: MentionUser) {
-        guard let attributedText = view?.m_attributedText else { return }
+        guard let attributedText = view?.m_attributedText,
+            font = view?.m_font
+            else { return }
+
         let text = NSMutableAttributedString(attributedString: attributedText)
         let mutableEncodedString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
+        mutableEncodedString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: mutableEncodedString.length))
         text.replaceCharactersInRange(mentionRange!, withAttributedString: mutableEncodedString)
         setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
         delegate?.userDidComposeMention?()
@@ -353,20 +400,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     private func refreshTableView() {
         tableView?.reloadData()
-        tableView?.hidden = userNameMatches.count == 0
-    }
-
-    // MARK: UTableViewDelegate
-
-    public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! MentionTableViewCell
-        if let user = cell.mentionUser {
-            injectMention(forUser: user)
-            userNameMatches.removeAll(keepCapacity: false)
-            refreshTableView()
-        }
-
-        view?.becomeFirstResponder()
+        tableView?.hidden = userNameMatches?.count == 0
     }
 
     // MARK: UIGestureRecognizerDelegate
@@ -396,8 +430,59 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     func textChanged(notification: NSNotification) {
-        print("text changed!")
+        guard let text = view?.m_text else { return }
+
+        if let query = mentionQuery(fromString: text) {
+            if let userNames = delegate?.usersMatchingQuery(searchQuery: query as String) {
+                self.userNameMatches = userNames
+                refreshTableView()
+            }
+        }
+        else {
+            userNameMatches = nil
+            tableView?.reloadData()
+            tableView?.hidden = true
+        }
+
+        if userNameMatches?.count > 0 {
+            if view?.m_autoCorrectionType != .No {
+                view?.m_autoCorrectionType = .No
+                refreshTextView()
+            }
+        }
+        else if view?.m_autoCorrectionType != originalAutoCorrectionType {
+            view?.m_autoCorrectionType = originalAutoCorrectionType
+            refreshTextView()
+        }
     }
+
+    // MARK: UITextViewDelegate
+
+//    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+//
+//        var location = range.location
+//        var deleting = false
+//        if (text == "") && (range.location != 0) {
+//            deleting = true
+//            location -= 1
+//        }
+//
+//        recentCharacterRange = NSRange(location: location, length: 1)
+//
+//        var mentionFound = false
+//        if let range = rangeOfMention(atIndex: range.location) {
+//            (deleting) ? deleteMention(inRange: range) : undoMention(inRange: range)
+//            mentionFound = true
+//        }
+//
+//        textView.typingAttributes.removeValueForKey(MentionAttributes.Encoded)
+//        textView.typingAttributes.removeValueForKey(MentionAttributes.UserId)
+//        textView.typingAttributes.removeValueForKey(MentionAttributes.Name)
+////        textView.typingAttributes.updateValue(originalTextColor, forKey: NSForegroundColorAttributeName)
+//
+//        return (deleting && mentionFound) ? false : true
+//
+//    }
 
 }
 
@@ -414,277 +499,6 @@ public protocol MentionUserCell {
     func usersMatchingQuery(searchQuery query: String) -> [MentionUser]
     
     optional func userDidComposeMention()
-}
-
-/**
-*  Use TextViewMentionComposer anytime you want to allow the user to compose an @mention using a UITextView.
-*/
-class TextViewMentionComposer: NSObject {
-    
-    private let MentionCellIdentifier = "MentionCell"
-    private let TextColor = UIColor.blueColor()
-    
-    private var mentionRange: NSRange?
-    private var tapRecognizer: UITapGestureRecognizer!
-    private var recentCharacterRange: NSRange = NSRange(location: 0, length: 0)
-    private let originalTextColor: UIColor
-    private let originalFont: UIFont
-    private let originalAutoCorrectionType: UITextAutocorrectionType!
-    var textView: UITextView
-    var tableView: UITableView
-    weak var delegate: MentionComposerDelegate?
-    var userNameMatches = [MentionUser]()
-    
-    /// Returns the text encoded for the API
-    var encodedText: String {
-        let encodedText = NSMutableAttributedString(attributedString: textView.attributedText)
-        
-        encodedText.enumerateAttribute(MentionAttributes.Encoded, inRange: NSRange(location: 0, length: encodedText.length), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
-            if let encodedMention = value as? String {
-                encodedText.replaceCharactersInRange(range, withString: encodedMention)
-            }
-        }
-        
-        return encodedText.string
-    }
-    
-    /// Returns the ids for every mentioned user
-    var mentionIds: [Int] {
-        var ids = [Int]()
-        textView.attributedText.enumerateAttribute(MentionAttributes.UserId, inRange: NSRange(location: 0, length: textView.attributedText.length), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
-            if let id = value as? Int {
-                ids.append(id)
-            }
-        }
-        
-        return ids
-    }
-    
-    /**
-    The default initializer for TextViewMentionComposer.
-    
-    :param: textView  The UITextView where the user will be entering text.
-    :param: tableView The UITableView that will display the list of users matching what the user is composing.
-    :param: delegate  The MentionComposerDelegate that will provide the users matching the query. TextViewMentionComposer is useless without a delegate.
-    
-    :returns: An instance if TextViewMentionComposer.
-    */
-    init(textView: UITextView, searchResultsTableView tableView: UITableView, delegate: MentionComposerDelegate?) {
-        self.textView = textView
-        self.delegate = delegate
-        self.tableView = tableView
-        originalTextColor = textView.textColor ?? UIColor.darkTextColor()
-        originalAutoCorrectionType = textView.autocorrectionType
-        originalFont = textView.font ?? UIFont.systemFontOfSize(UIFont.systemFontSize())
-        super.init()
-        textView.delegate = self
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.registerNib(UINib(nibName: "MentionTableViewCell", bundle: nil), forCellReuseIdentifier: MentionCellIdentifier)
-        tapRecognizer = UITapGestureRecognizer(target: self, action: "tableViewTapped:")
-        tapRecognizer.delegate = self
-        tapRecognizer.cancelsTouchesInView = false
-        tapRecognizer.delaysTouchesEnded = false
-        tableView.addGestureRecognizer(tapRecognizer)
-    }
-    
-    // MARK: Private methods
-    
-    private func mentionQuery(fromString string: NSString) -> NSString? {
-        var query: NSString?
-        
-        let pattern = "\\@[^\\@.+]+"
-        do {
-            let regex = try NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
-            
-            let range = NSRange(location: 0, length: string.length)
-            
-            let matches = regex.matchesInString(string as String, options: .ReportCompletion, range: range)
-            
-            for match in matches {
-                // Match must be contained in the text the user most recently changed
-                if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
-                    let queryLength = recentCharacterRange.location - match.range.location + 1
-                    mentionRange = NSRange(location: match.range.location, length: queryLength)
-                    query = string.substringWithRange(mentionRange!) as NSString
-                    query = query?.substringFromIndex(1)
-                }
-            }
-        } catch {
-            print("could not create regex!")
-        }
-        
-        return query
-    }
-    
-    private func setAttributedText(attributedText: NSAttributedString, cursorLocation: Int) {
-        textView.attributedText = attributedText
-        textView.selectedRange = NSRange(location: cursorLocation, length: 0)
-    }
-    
-    private func injectMention(forUser user: MentionUser) {
-        let text = NSMutableAttributedString(attributedString: textView.attributedText)
-        let mutableEncodedString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
-        mutableEncodedString.addAttributes([NSFontAttributeName : originalFont, NSForegroundColorAttributeName : TextColor], range: NSRange(location: 0, length: mutableEncodedString.length))
-        text.replaceCharactersInRange(mentionRange!, withAttributedString: mutableEncodedString)
-        setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
-        delegate?.userDidComposeMention?()
-    }
-    
-    private func rangeOfMention(atIndex index: Int) -> NSRange? {
-        var mentionRange: NSRange?
-        let currentRange = NSRange(location: index, length: 1)
-        
-        textView.attributedText.enumerateAttribute(MentionAttributes.Encoded, inRange: NSRange(location: 0, length: textView.attributedText.length), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
-            if value != nil  {
-                let rangeAfterFirstCharacter = NSRange(location: range.location + 1, length: range.length - 1)
-                if NSIntersectionRange(rangeAfterFirstCharacter, currentRange).length > 0 {
-                    mentionRange = range
-                    stop.memory = true
-                }
-            }
-        }
-        
-        return mentionRange
-    }
-    
-    private func deleteMention(inRange range: NSRange) {
-        let mutableText = NSMutableAttributedString(attributedString: self.textView.attributedText)
-        mutableText.deleteCharactersInRange(range)
-        self.setAttributedText(mutableText, cursorLocation: range.location)
-    }
-    
-    private func undoMention(inRange range: NSRange) {
-        let mutableText = NSMutableAttributedString(attributedString: self.textView.attributedText)
-        mutableText.removeAttribute(MentionAttributes.Encoded, range: range)
-        mutableText.removeAttribute(MentionAttributes.Name, range: range)
-        mutableText.removeAttribute(MentionAttributes.UserId, range: range)
-        mutableText.removeAttribute(NSForegroundColorAttributeName, range: range)
-        self.setAttributedText(mutableText, cursorLocation: recentCharacterRange.location)
-    }
-    
-    private func refreshTableView() {
-        tableView.reloadData()
-        tableView.hidden = userNameMatches.count == 0
-    }
-}
-
-extension TextViewMentionComposer: UIGestureRecognizerDelegate {
-    // MARK: UIGestureRecognizerDelegate
-    
-    func tableViewTapped(recognizer: UITapGestureRecognizer) {
-        tableView.becomeFirstResponder()
-    }
-    
-    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-        var shouldBegin = true
-        if (gestureRecognizer == tapRecognizer) {
-            if tableView.isFirstResponder() {
-                shouldBegin = false
-            }
-        }
-        
-        return shouldBegin
-    }
-}
-
-extension TextViewMentionComposer: UITextViewDelegate {
-    
-    /**
-    In order for some property changes to take effect on UITextView you must resignFirstResponder
-    and then becomeFirstResponder. This method calls these methods back to back respectively.
-    The delegate of the text view is set to nil immediately beforehand so we do not forwards the UITextViewDelegate
-    methods in MentionComposerDelegate. Immediately proceeding this we set the delegate back to its original state.
-    */
-    private func refreshTextView() {
-        textView.delegate = nil
-        textView.resignFirstResponder()
-        textView.becomeFirstResponder()
-        textView.delegate = self
-    }
-    
-    // MARK: UITextViewDelegate
-    
-    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
-        
-        var location = range.location
-        var deleting = false
-        if (text == "") && (range.location != 0) {
-            deleting = true
-            location -= 1
-        }
-        
-        recentCharacterRange = NSRange(location: location, length: 1)
-        
-        var mentionFound = false
-        if let range = rangeOfMention(atIndex: range.location) {
-            (deleting) ? deleteMention(inRange: range) : undoMention(inRange: range)
-            mentionFound = true
-        }
-        
-        textView.typingAttributes.removeValueForKey(MentionAttributes.Encoded)
-        textView.typingAttributes.removeValueForKey(MentionAttributes.UserId)
-        textView.typingAttributes.removeValueForKey(MentionAttributes.Name)
-        textView.typingAttributes.updateValue(originalTextColor, forKey: NSForegroundColorAttributeName)
-        
-        return (deleting && mentionFound) ? false : true
-        
-    }
-    
-    func textViewDidChange(textView: UITextView) {
-        let text = textView.text as NSString
-        if let query = mentionQuery(fromString: text) {
-            if let userNames = delegate?.usersMatchingQuery(searchQuery: query as String) {
-                userNameMatches = userNames
-                refreshTableView()
-            }
-        }
-        else {
-            userNameMatches.removeAll(keepCapacity: false)
-            tableView.reloadData()
-            tableView.hidden = true
-        }
-        
-        if userNameMatches.count > 0 {
-            if textView.autocorrectionType != .No {
-                textView.autocorrectionType = .No
-                refreshTextView()
-            }
-        }
-        else if textView.autocorrectionType != originalAutoCorrectionType {
-            textView.autocorrectionType = originalAutoCorrectionType
-            refreshTextView()
-        }
-    }
-}
-
-extension TextViewMentionComposer: UITableViewDataSource, UITableViewDelegate {
-    // MARK: UITableViewDataSource
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userNameMatches.count
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as! MentionTableViewCell
-        let user = userNameMatches[indexPath.row]
-        cell.mentionUser = user
-        
-        return cell
-    }
-    
-    // MARK: UTableViewDelegate
-    
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! MentionTableViewCell
-        if let user = cell.mentionUser {
-            injectMention(forUser: user)
-            userNameMatches.removeAll(keepCapacity: false)
-            refreshTableView()
-        }
-        
-        textView.becomeFirstResponder()
-    }
 }
 
 // MARK: - Decoding
@@ -706,7 +520,7 @@ public protocol TagDecoder {
 struct MentionDecoder: TagDecoder {
 
     var pattern         = "\\[\\@.+?\\:[0-9]+\\]"
-    let tagColor        = UIColor.blueColor()
+    let tagColor        = MentionColor
     let tagFont         = UIFont.systemFontOfSize(18)
     let userIdSignifier = ":"
     let attributedString: NSAttributedString

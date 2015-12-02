@@ -329,7 +329,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
             for match in matches {
                 // Match must be contained in the text the user most recently changed
-                view?.selectedTextRange
                 if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
                     let queryLength = recentCharacterRange.location - match.range.location + 1
                     mentionRange = NSRange(location: match.range.location, length: queryLength)
@@ -345,9 +344,14 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     private func setAttributedText(attributedText: NSAttributedString, cursorLocation: Int) {
-        let selectedRange = view?.selectedTextRange
         view?.m_attributedText = attributedText
-        view?.selectedTextRange = selectedRange
+
+        guard let
+            beginning = view?.beginningOfDocument,
+            position = view?.positionFromPosition(beginning, offset: cursorLocation)
+            else { return }
+
+        view?.selectedTextRange = view?.textRangeFromPosition(position, toPosition: position)
     }
 
     private func injectMention(forUser user: MentionUser) {
@@ -425,8 +429,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
      and then becomeFirstResponder. This method calls these methods back to back respectively.
      */
     private func refreshTextView() {
+        let selectedRange = view?.selectedTextRange
         view?.resignFirstResponder()
         view?.becomeFirstResponder()
+        view?.selectedTextRange = selectedRange
     }
 
     func textChanged(notification: NSNotification) {

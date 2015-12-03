@@ -313,6 +313,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextViewTextDidChangeNotification, object: view)
     }
 
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+
     // MARK: UITableViewDataSource
 
     public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

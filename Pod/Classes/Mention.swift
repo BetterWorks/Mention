@@ -422,16 +422,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         setAttributedText(mutableText, cursorLocation: range.location)
     }
 
-    private func undoMention(inRange range: NSRange) {
-        guard let attributedText = view?.m_attributedText else { return }
-        let mutableText = NSMutableAttributedString(attributedString: attributedText)
-        mutableText.removeAttribute(MentionAttributes.Encoded, range: range)
-        mutableText.removeAttribute(MentionAttributes.Name, range: range)
-        mutableText.removeAttribute(MentionAttributes.UserId, range: range)
-        mutableText.removeAttribute(NSForegroundColorAttributeName, range: range)
-        setAttributedText(mutableText, cursorLocation: recentCharacterRange.location)
-    }
-
     private func refreshTableView() {
         tableView?.reloadData()
         tableView?.hidden = userNameMatches?.count == 0

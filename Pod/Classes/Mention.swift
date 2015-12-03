@@ -250,7 +250,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private let originalAutoCorrectionType: UITextAutocorrectionType
     private let originalTextColor: UIColor
     private var userNameMatches: [MentionUser]?
-    private var previousCharacterCount = 0
 
     private var mentionCache = [Int : Int]()
 
@@ -517,8 +516,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         }
 
         view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
-
-        previousCharacterCount = (view?.m_attributedText?.string.characters.count)!
     }
 
 }

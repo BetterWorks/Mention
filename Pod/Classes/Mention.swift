@@ -425,7 +425,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let mutableText = NSMutableAttributedString(attributedString: attributedText)
         mutableText.deleteCharactersInRange(range)
         setAttributedText(mutableText, cursorLocation: range.location)
-        view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
     }
 
     private func refreshTableView() {
@@ -500,6 +499,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             view?.m_autoCorrectionType = originalAutoCorrectionType
             refreshTextView()
         }
+
+        view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
 
         previousCharacterCount = (view?.m_attributedText?.string.characters.count)!
     }

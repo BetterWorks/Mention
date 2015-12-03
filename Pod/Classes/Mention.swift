@@ -247,7 +247,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     var delegate: MentionComposerDelegate?
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
-    private let originalAutoCorrectionType: UITextAutocorrectionType!
+    private let originalAutoCorrectionType: UITextAutocorrectionType
     private var userNameMatches: [MentionUser]?
     private var previousCharacterCount = 0
 
@@ -298,7 +298,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         self.view?.configureDefaultAttributedText()
         self.tableView = tableView
         self.delegate = delegate
-        self.originalAutoCorrectionType = view.autocorrectionType
+        self.originalAutoCorrectionType = view.m_autoCorrectionType
         super.init()
         tableView.delegate = self
         tableView.dataSource = self

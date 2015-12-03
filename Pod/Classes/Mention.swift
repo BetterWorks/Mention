@@ -390,12 +390,12 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             else { return }
 
         let text = NSMutableAttributedString(attributedString: attributedText)
-        let mutableEncodedString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
-        mutableEncodedString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: mutableEncodedString.length))
-        text.replaceCharactersInRange(mentionRange!, withAttributedString: mutableEncodedString)
-        mentionCache[user.id] = mutableEncodedString.length
+        let encodedMentionString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
+        encodedMentionString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: encodedMentionString.length))
+        text.replaceCharactersInRange(mentionRange!, withAttributedString: encodedMentionString)
+        mentionCache[user.id] = encodedMentionString.length
         let typingAttributes = view?.m_typingAttributes
-        setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
+        setAttributedText(text, cursorLocation: mentionRange!.location + encodedMentionString.length)
         view?.m_typingAttributes = typingAttributes
         view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
         delegate?.userDidComposeMention?()

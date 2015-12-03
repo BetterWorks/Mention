@@ -248,6 +248,9 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private let originalAutoCorrectionType: UITextAutocorrectionType!
     private var userNameMatches: [MentionUser]?
     private var previousCharacterCount = 0
+
+    private var mentionCache = [Int : Int]()
+
     private var recentCharacterRange: NSRange {
         guard let
             beginning = view?.beginningOfDocument,
@@ -387,6 +390,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let mutableEncodedString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
         mutableEncodedString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: mutableEncodedString.length))
         text.replaceCharactersInRange(mentionRange!, withAttributedString: mutableEncodedString)
+        mentionCache[user.id] = mutableEncodedString.length
         let typingAttributes = view?.m_typingAttributes
         setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
         view?.m_typingAttributes = typingAttributes
@@ -464,9 +468,13 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     func textChanged() {
         guard let text = view?.m_text else { return }
 
-        let deleting = view?.m_attributedText?.string.characters.count < previousCharacterCount
-        if let range = rangeOfMention(atIndex: recentCharacterRange.location) {
-            deleting ? deleteMention(inRange: range) : undoMention(inRange: range)
+        view?.m_attributedText?.enumerateAttribute(MentionAttributes.UserId, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
+            guard let value = value as? Int else { return }
+            if let length = self.mentionCache[value] where length != range.length + 1 {
+                self.deleteMention(inRange: range)
+                self.mentionCache.removeValueForKey(value)
+                stop.memory = true
+            }
         }
 
         if let query = mentionQuery(fromString: text) {

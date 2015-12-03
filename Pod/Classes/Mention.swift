@@ -149,9 +149,12 @@ extension UITextView: ComposableAttributedTextContainingView {
 }
 
 extension AttributedTextContainingView {
-    mutating func configureDefaultAttributedText() -> NSAttributedString {
-        m_attributedText = m_attributedText ?? NSAttributedString(string: m_text, attributes: [NSFontAttributeName : m_font, NSForegroundColorAttributeName : m_textColor])
-        return m_attributedText!
+    mutating func configureDefaultAttributedText() {
+        m_attributedText = m_attributedText ?? defaultAttributedText
+    }
+
+    var defaultAttributedText: NSAttributedString {
+        return NSAttributedString(string: m_text, attributes: [NSFontAttributeName : m_font, NSForegroundColorAttributeName : m_textColor])
     }
 }
 
@@ -175,9 +178,8 @@ public class MentionController<T: UIView where T: AttributedTextContainingView>:
 
     - returns: An instance of MentionController
     */
-    public convenience init(var view: T, delegate: MentionTapHandlerDelegate?) {
-        let attributedString = view.configureDefaultAttributedText()
-        self.init(view: view, inputString: attributedString, delegate: delegate)
+    public convenience init(view: T, delegate: MentionTapHandlerDelegate?) {
+        self.init(view: view, inputString: view.defaultAttributedText, delegate: delegate)
     }
 
     private init(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {

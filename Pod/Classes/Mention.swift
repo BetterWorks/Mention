@@ -248,6 +248,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalAutoCorrectionType: UITextAutocorrectionType
+    private let originalTextColor: UIColor
     private var userNameMatches: [MentionUser]?
     private var previousCharacterCount = 0
 
@@ -299,6 +300,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         self.tableView = tableView
         self.delegate = delegate
         self.originalAutoCorrectionType = view.m_autoCorrectionType
+        self.originalTextColor = view.m_textColor
         super.init()
         tableView.delegate = self
         tableView.dataSource = self
@@ -422,6 +424,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let mutableText = NSMutableAttributedString(attributedString: attributedText)
         mutableText.deleteCharactersInRange(range)
         setAttributedText(mutableText, cursorLocation: range.location)
+        view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
     }
 
     private func refreshTableView() {

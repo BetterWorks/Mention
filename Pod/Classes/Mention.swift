@@ -405,24 +405,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         delegate?.userDidComposeMention?()
     }
 
-    private func rangeOfMention(atIndex index: Int) -> NSRange? {
-        var mentionRange: NSRange?
-        let currentRange = NSRange(location: index, length: 1)
-        guard let attributedText = view?.m_attributedText else { return mentionRange }
-
-        attributedText.enumerateAttribute(MentionAttributes.Encoded, inRange: NSRange(location: 0, length: attributedText.length), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
-            if value != nil  {
-                let rangeAfterFirstCharacter = NSRange(location: range.location + 1, length: range.length - 1)
-                if NSIntersectionRange(rangeAfterFirstCharacter, currentRange).length > 0 {
-                    mentionRange = range
-                    stop.memory = true
-                }
-            }
-        }
-
-        return mentionRange
-    }
-
     private func deleteMention(inRange range: NSRange) {
         guard let attributedText = view?.m_attributedText else { return }
         let mutableText = NSMutableAttributedString(attributedString: attributedText)

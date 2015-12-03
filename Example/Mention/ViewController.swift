@@ -28,8 +28,8 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: MentionComposerDelegate {
-    func usersMatchingQuery(searchQuery query: String) -> [MentionUser] {
-        return [MentionUser(name: "test user", id: 0, imageURL: nil)]
+    func usersMatchingQuery(query: String, handler: MentionUserClosure) {
+        handler(users: [MentionUser(name: "test user", id: 0, imageURL: nil)])
     }
 }
 

@@ -235,6 +235,16 @@ public class MentionUser: NSObject {
     }
 }
 
+/**
+ *  The primary purpose MentionComposerDelegate is to provide the list of users matching an @mention query.
+ *  Because TextViewMentionComposer relies on the UITextViewDelegate callbacks, it forwards all of them onto the MentionComposerDelegate.
+ */
+
+public typealias MentionUserClosure = (users: [MentionUser]?) -> Void
+public protocol MentionComposerDelegate: class {
+    func usersMatchingQuery(query: String, handler: MentionUserClosure)
+}
+
 public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UIGestureRecognizerDelegate, UITableViewDelegate, UITableViewDataSource {
 
     private let MentionCellIdentifier = "MentionCellReuseIdentifier"
@@ -244,7 +254,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     var view: T?
     var tableView: UITableView?
-    var delegate: MentionComposerDelegate?
+    weak var delegate: MentionComposerDelegate?
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalAutoCorrectionType: UITextAutocorrectionType
@@ -402,7 +412,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         setAttributedText(text, cursorLocation: mentionRange!.location + encodedMentionString.length)
         view?.m_typingAttributes = typingAttributes
         view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
-        delegate?.userDidComposeMention?()
     }
 
     private func deleteMention(inRange range: NSRange) {
@@ -479,9 +488,11 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         }
 
         if let query = mentionQuery(fromString: text) {
-            if let userNames = delegate?.usersMatchingQuery(searchQuery: query as String) {
-                self.userNameMatches = userNames
-                refreshTableView()
+            delegate?.usersMatchingQuery(query as String) { [weak self] (users) -> Void in
+                if let users = users {
+                    self?.userNameMatches = users
+                    self?.refreshTableView()
+                }
             }
         }
         else {
@@ -508,17 +519,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
 public protocol MentionUserCell {
     var mentionUser: MentionUser? { get set }
-}
-
-/**
-*  The primary purpose MentionComposerDelegate is to provide the list of users matching an @mention query.
-*  Because TextViewMentionComposer relies on the UITextViewDelegate callbacks, it forwards all of them onto the MentionComposerDelegate.
-*/
-@objc public protocol MentionComposerDelegate {
-   
-    func usersMatchingQuery(searchQuery query: String) -> [MentionUser]
-    
-    optional func userDidComposeMention()
 }
 
 // MARK: - Decoding

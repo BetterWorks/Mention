@@ -398,6 +398,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let typingAttributes = view?.m_typingAttributes
         setAttributedText(text, cursorLocation: mentionRange!.location + mutableEncodedString.length)
         view?.m_typingAttributes = typingAttributes
+        view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
         delegate?.userDidComposeMention?()
     }
 
@@ -463,13 +464,18 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     func textChanged() {
         guard let text = view?.m_text else { return }
 
+        var removedMentionIds = Set<Int>()
         view?.m_attributedText?.enumerateAttribute(MentionAttributes.UserId, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
             guard let value = value as? Int else { return }
+
             if let length = self.mentionCache[value] where length != range.length + 1 {
+                removedMentionIds.insert(value)
                 self.deleteMention(inRange: range)
-                self.mentionCache.removeValueForKey(value)
-                stop.memory = true
             }
+        }
+
+        for mentionId in removedMentionIds {
+            self.mentionCache.removeValueForKey(mentionId)
         }
 
         if let query = mentionQuery(fromString: text) {

@@ -503,34 +503,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         previousCharacterCount = (view?.m_attributedText?.string.characters.count)!
     }
 
-    // MARK: UITextViewDelegate
-
-//    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
-//
-//        var location = range.location
-//        var deleting = false
-//        if (text == "") && (range.location != 0) {
-//            deleting = true
-//            location -= 1
-//        }
-//
-//        recentCharacterRange = NSRange(location: location, length: 1)
-//
-//        var mentionFound = false
-//        if let range = rangeOfMention(atIndex: range.location) {
-//            (deleting) ? deleteMention(inRange: range) : undoMention(inRange: range)
-//            mentionFound = true
-//        }
-//
-//        textView.typingAttributes.removeValueForKey(MentionAttributes.Encoded)
-//        textView.typingAttributes.removeValueForKey(MentionAttributes.UserId)
-//        textView.typingAttributes.removeValueForKey(MentionAttributes.Name)
-////        textView.typingAttributes.updateValue(originalTextColor, forKey: NSForegroundColorAttributeName)
-//
-//        return (deleting && mentionFound) ? false : true
-//
-//    }
-
 }
 
 public protocol MentionUserCell {

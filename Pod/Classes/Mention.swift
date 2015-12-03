@@ -477,6 +477,22 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             self.mentionCache.removeValueForKey(mentionId)
         }
 
+        guard let updatedTextLength = view?.m_text.characters.count else { return }
+        var rangeToUpdate: NSRange?
+        view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: updatedTextLength), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
+            guard let color = value as? UIColor where color == MentionColor else { return }
+            guard let attributes = self.view?.m_attributedText?.attributesAtIndex(range.location, effectiveRange: nil) where !attributes.keys.contains(MentionAttributes.Encoded) else { return }
+
+            rangeToUpdate = range
+            stop.memory = true
+        }
+
+        if let range = rangeToUpdate {
+            let mutableString = NSMutableAttributedString(attributedString: self.view!.m_attributedText!)
+            mutableString.addAttribute(NSForegroundColorAttributeName, value: self.originalTextColor, range: range)
+            self.view?.m_attributedText = mutableString
+        }
+
         if let query = mentionQuery(fromString: text) {
             if let userNames = delegate?.usersMatchingQuery(searchQuery: query as String) {
                 self.userNameMatches = userNames

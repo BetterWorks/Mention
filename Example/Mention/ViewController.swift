@@ -32,4 +32,3 @@ extension ViewController: MentionComposerDelegate {
         handler(users: [MentionUser(name: "test user", id: 0, imageURL: nil)])
     }
 }
-

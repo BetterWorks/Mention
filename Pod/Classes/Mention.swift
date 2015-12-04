@@ -275,7 +275,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     /// Returns the text encoded for the API
-    var encodedText: String? {
+    public var encodedText: String? {
         guard let attributedText = view?.m_attributedText else { return view?.m_text }
         let encodedText = NSMutableAttributedString(attributedString: attributedText)
 
@@ -289,7 +289,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     /// Returns the ids for every mentioned user
-    var mentionIds: [Int] {
+    public var mentionIds: [Int] {
         var ids = [Int]()
 
         guard let attributedText = view?.m_attributedText else { return ids }

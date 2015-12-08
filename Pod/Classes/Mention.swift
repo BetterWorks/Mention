@@ -213,14 +213,14 @@ public class MentionController<T: UIView where T: AttributedTextContainingView>:
 */
 public class MentionUser: NSObject {
     
-    public let name: String
-    public let id: Int
-    public let imageURL: String?
+    public var name: String
+    public var id: Int
+    public var userInfo: [NSObject : AnyObject]?
     
-    public init(name: String, id: Int, imageURL: String?) {
+    public init(name: String, id: Int, userInfo: [NSObject : AnyObject]? = nil) {
         self.name = name
         self.id = id
-        self.imageURL = imageURL
+        self.userInfo = userInfo
     }
     
     func encodedAttributedString() -> NSAttributedString {

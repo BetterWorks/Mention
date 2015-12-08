@@ -259,7 +259,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalAutoCorrectionType: UITextAutocorrectionType
     private let originalTextColor: UIColor
-    private var userNameMatches: [MentionUser]?
+    private var userNameMatches = [MentionUser]()
 
     private var mentionCache = [Int : Int]()
 
@@ -336,12 +336,12 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     // MARK: UITableViewDataSource
 
     public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userNameMatches?.count ?? 0
+        return userNameMatches.count
     }
 
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as? MentionUserCell
-        let user = userNameMatches?[indexPath.row]
+        let user = userNameMatches[indexPath.row]
         cell?.mentionUser = user
 
         return cell as? UITableViewCell ?? UITableViewCell()
@@ -360,7 +360,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             else { return }
 
         injectMention(forUser: user)
-        userNameMatches = nil
+        userNameMatches.removeAll()
         refreshTableView()
 
         view?.becomeFirstResponder()
@@ -431,7 +431,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     private func refreshTableView() {
         tableView?.reloadData()
-        tableView?.hidden = userNameMatches?.count == 0
+        tableView?.hidden = userNameMatches.count == 0
     }
 
     // MARK: UIGestureRecognizerDelegate
@@ -504,12 +504,12 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             }
         }
         else {
-            userNameMatches = nil
+            userNameMatches.removeAll()
             tableView?.reloadData()
             tableView?.hidden = true
         }
 
-        if userNameMatches?.count > 0 {
+        if userNameMatches.count > 0 {
             if view?.m_autoCorrectionType != .No {
                 view?.m_autoCorrectionType = .No
                 refreshTextView()

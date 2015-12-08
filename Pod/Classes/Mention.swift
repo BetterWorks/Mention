@@ -354,18 +354,20 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     // MARK: UTableViewDelegate
 
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! MentionTableViewCell
-        if let user = cell.mentionUser {
-            injectMention(forUser: user)
-            userNameMatches = nil
-            refreshTableView()
-        }
+        guard let
+            cell = tableView.cellForRowAtIndexPath(indexPath) as? MentionUserCell,
+            user = cell.mentionUser
+            else { return }
+
+        injectMention(forUser: user)
+        userNameMatches = nil
+        refreshTableView()
 
         view?.becomeFirstResponder()
     }
 
     // MARK: Private methods
-
+    
     private func mentionQuery(fromString string: NSString) -> NSString? {
         var query: NSString?
 

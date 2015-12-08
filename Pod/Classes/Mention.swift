@@ -625,7 +625,7 @@ public protocol MentionTapHandlerDelegate: class {
 
 /// Listens for taps on the supplied view and calls the corresponding MentionTapHandlerDelegate method.
 /// Note: Creates an instance of UITapGestureRecognizer on the supplied UIView.
-private class MentionTapHandler<T: UIView where T: AttributedTextContainingView>: NSObject {
+class MentionTapHandler<T: UIView where T: AttributedTextContainingView>: NSObject {
 
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?
@@ -635,6 +635,7 @@ private class MentionTapHandler<T: UIView where T: AttributedTextContainingView>
         self.delegate = delegate
         tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")
         view.addGestureRecognizer(tapRecognizer)
+        view.userInteractionEnabled = true
     }
 
      /**

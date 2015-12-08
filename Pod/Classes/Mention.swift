@@ -303,6 +303,12 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         return ids
     }
 
+    public var nib: UINib? {
+        didSet {
+            tableView?.registerNib(nib, forCellReuseIdentifier: MentionCellIdentifier)
+        }
+    }
+
     public init(view: T, searchResultsTableView tableView: UITableView, delegate: MentionComposerDelegate?) {
         self.view = view
         self.view?.configureDefaultAttributedText()
@@ -334,11 +340,11 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as! MentionUserCell
+        var cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as? MentionUserCell
         let user = userNameMatches?[indexPath.row]
-        cell.mentionUser = user
+        cell?.mentionUser = user
 
-        return cell as! UITableViewCell
+        return cell as? UITableViewCell ?? UITableViewCell()
     }
 
     public func setCellClass<U: UITableViewCell where U: MentionUserCell>(cellClass: U.Type) {

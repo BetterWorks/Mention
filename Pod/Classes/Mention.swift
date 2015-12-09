@@ -185,7 +185,7 @@ public class MentionController<T: UIView where T: AttributedTextContainingView>:
     private init(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
         self.view = view
         self.delegate = delegate
-        self.mentionDecoder = MentionDecoder(attributedString: inputString)
+        self.mentionDecoder = MentionDecoder(attributedString: inputString, font: view.m_font)
         super.init()
 
         // Decode
@@ -549,12 +549,13 @@ struct MentionDecoder: TagDecoder {
 
     var pattern         = "\\[\\@.+?\\:[0-9]+\\]"
     let tagColor        = MentionColor
-    let tagFont         = UIFont.systemFontOfSize(18)
     let userIdSignifier = ":"
     let attributedString: NSAttributedString
+    let tagFont: UIFont
 
-    init(attributedString: NSAttributedString) {
+    init(attributedString: NSAttributedString, font: UIFont) {
         self.attributedString = attributedString
+        self.tagFont = font
     }
 
     /**

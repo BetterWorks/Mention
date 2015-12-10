@@ -451,7 +451,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalTextColor: UIColor
     private var userNameMatches = [MentionUserType]()
-
     private var lengthOfMentionPerId = [Int : Int]()
 
     private var recentCharacterRange: NSRange {

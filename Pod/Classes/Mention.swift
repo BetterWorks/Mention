@@ -30,7 +30,6 @@ public protocol AttributedTextContainingView: CharacterFinder {
 }
 
 public protocol ComposableAttributedTextContainingView: AttributedTextContainingView, UITextInputTraits, UITextInput {
-    var m_autoCorrectionType: UITextAutocorrectionType { get set }
     var m_typingAttributes: [String : AnyObject]? { get set }
 }
 
@@ -86,15 +85,6 @@ extension UITextField: ComposableAttributedTextContainingView {
         return textColor!
     }
 
-    public var m_autoCorrectionType: UITextAutocorrectionType {
-        get {
-            return autocorrectionType
-        }
-        set {
-            autocorrectionType = newValue
-        }
-    }
-
     public var m_typingAttributes: [String : AnyObject]? {
         get {
             return typingAttributes
@@ -127,15 +117,6 @@ extension UITextView: ComposableAttributedTextContainingView {
 
     public var m_textColor: UIColor {
         return textColor!
-    }
-
-    public var m_autoCorrectionType: UITextAutocorrectionType {
-        get {
-            return autocorrectionType
-        }
-        set {
-            autocorrectionType = newValue
-        }
     }
 
     public var m_typingAttributes: [String : AnyObject]? {
@@ -257,7 +238,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     weak var delegate: MentionComposerDelegate?
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
-    private let originalAutoCorrectionType: UITextAutocorrectionType
     private let originalTextColor: UIColor
     private var userNameMatches = [MentionUser]()
 
@@ -314,7 +294,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         self.view?.configureDefaultAttributedText()
         self.tableView = tableView
         self.delegate = delegate
-        self.originalAutoCorrectionType = view.m_autoCorrectionType
         self.originalTextColor = view.m_textColor
         super.init()
         tableView.delegate = self
@@ -451,17 +430,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         return shouldBegin
     }
 
-    /**
-     In order for some property changes to take effect on UITextView you must resignFirstResponder
-     and then becomeFirstResponder. This method calls these methods back to back respectively.
-     */
-    private func refreshTextView() {
-        let selectedRange = view?.selectedTextRange
-        view?.resignFirstResponder()
-        view?.becomeFirstResponder()
-        view?.selectedTextRange = selectedRange
-    }
-
     func textChanged() {
         guard let text = view?.m_text else { return }
 
@@ -512,17 +480,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         else {
             userNameMatches.removeAll()
             refreshTableView()
-        }
-
-        if userNameMatches.count > 0 {
-            if view?.m_autoCorrectionType != .No {
-                view?.m_autoCorrectionType = .No
-                refreshTextView()
-            }
-        }
-        else if view?.m_autoCorrectionType != originalAutoCorrectionType {
-            view?.m_autoCorrectionType = originalAutoCorrectionType
-            refreshTextView()
         }
 
         view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor

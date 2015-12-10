@@ -76,11 +76,11 @@ extension UITextField: ComposableAttributedTextContainingView {
     }
 
     public var m_font: UIFont {
-        return font!
+        return font ?? UIFont.systemFontOfSize(UIFont.systemFontSize())
     }
 
     public var m_textColor: UIColor {
-        return textColor!
+        return textColor ?? UIColor.darkTextColor()
     }
 
     public var m_typingAttributes: [String : AnyObject]? {
@@ -110,11 +110,11 @@ extension UITextView: ComposableAttributedTextContainingView {
     }
 
     public var m_font: UIFont {
-        return font!
+        return font ?? UIFont.systemFontOfSize(UIFont.systemFontSize())
     }
 
     public var m_textColor: UIColor {
-        return textColor!
+        return textColor ?? UIColor.darkTextColor()
     }
 
     public var m_typingAttributes: [String : AnyObject]? {
@@ -122,7 +122,7 @@ extension UITextView: ComposableAttributedTextContainingView {
             return typingAttributes
         }
         set {
-            typingAttributes = newValue!
+            typingAttributes = newValue ?? [String : AnyObject]()
         }
     }
 }
@@ -420,7 +420,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     var view: T?
     var tableView: UITableView?
     weak var delegate: MentionComposerDelegate?
-    private var mentionRange: NSRange?
+    private var mentionRange = NSRange(location: 0, length: 0)
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalTextColor: UIColor
     private var userNameMatches = [MentionUserType]()
@@ -550,7 +550,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             // Match must be contained in the text the user most recently changed
             if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
                 mentionRange = NSRange(location: match.range.location, length: match.range.length)
-                query = string.substringWithRange(mentionRange!) as NSString
+                query = string.substringWithRange(mentionRange) as NSString
                 query = query?.substringFromIndex(1)
             }
         }
@@ -578,10 +578,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let text = NSMutableAttributedString(attributedString: attributedText)
         let encodedMentionString = NSMutableAttributedString(attributedString: user.humanReadableMentionString)
         encodedMentionString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: encodedMentionString.length))
-        text.replaceCharactersInRange(mentionRange!, withAttributedString: encodedMentionString)
+        text.replaceCharactersInRange(mentionRange, withAttributedString: encodedMentionString)
         lengthOfMentionPerId[user.id] = encodedMentionString.length
         let typingAttributes = view?.m_typingAttributes
-        setAttributedText(text, cursorLocation: mentionRange!.location + encodedMentionString.length)
+        setAttributedText(text, cursorLocation: mentionRange.location + encodedMentionString.length)
         view?.m_typingAttributes = typingAttributes
         view?.m_typingAttributes?[NSForegroundColorAttributeName] = originalTextColor
     }
@@ -616,7 +616,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     func textChanged() {
-        guard let text = view?.m_text else { return }
+        guard let
+            text = view?.m_text,
+            attributedString = view?.m_attributedText
+            else { return }
 
         // Delete mentions if either of the following conditions are met:
         // 1. A character in the mention was deleted
@@ -637,9 +640,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
         // When typing a character immediately adjacent to or within the range of a mention, the character will automatically be given the styling of a mention (text color and font).
         // Here we restore that character to the non-mention styling.
-        guard let updatedTextLength = view?.m_text.characters.count else { return }
         var rangeToUpdate: NSRange?
-        view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: updatedTextLength), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
+        view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
             guard let color = value as? UIColor where color == MentionColor else { return }
             var effectiveRange = NSRange(location: 0, length: 20)
             guard let attributes = self.view?.m_attributedText?.attributesAtIndex(range.location, effectiveRange: &effectiveRange) where !attributes.keys.contains(MentionAttributes.Encoded) else { return }
@@ -648,7 +650,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         }
 
         if let range = rangeToUpdate {
-            let mutableString = NSMutableAttributedString(attributedString: self.view!.m_attributedText!)
+            let mutableString = NSMutableAttributedString(attributedString: attributedString)
             mutableString.addAttribute(NSForegroundColorAttributeName, value: self.originalTextColor, range: range)
             setAttributedText(mutableString, cursorLocation: recentCharacterRange.location + 1)
         }

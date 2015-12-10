@@ -494,20 +494,9 @@ public protocol MentionUserCell {
 // MARK: - Decoding
 
 /**
-*  A protocol for classes or structs that decode @mentions, tags, or more.
-*/
-public protocol TagDecoder {
-    /// Typically a regex pattern for your tag
-    var pattern: String { get }
-    /// The text color for decoded tags
-    var tagColor: UIColor { get }
-    func decode() -> NSAttributedString
-}
-
-/**
  *  A MentionDecoder instance finds occurences of @mentions in a string and converts them to regular text
  */
-struct MentionDecoder: TagDecoder {
+struct MentionDecoder {
 
     var pattern         = "\\[\\@.+?\\:[0-9]+\\]"
     let tagColor        = MentionColor

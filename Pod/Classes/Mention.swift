@@ -462,7 +462,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private let originalTextColor: UIColor
     private var userNameMatches = [MentionUser]()
 
-    private var mentionCache = [Int : Int]()
+    private var lengthOfMentionPerId = [Int : Int]()
 
     private var recentCharacterRange: NSRange {
         guard let
@@ -615,7 +615,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         let encodedMentionString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
         encodedMentionString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: encodedMentionString.length))
         text.replaceCharactersInRange(mentionRange!, withAttributedString: encodedMentionString)
-        mentionCache[user.id] = encodedMentionString.length
+        lengthOfMentionPerId[user.id] = encodedMentionString.length
         let typingAttributes = view?.m_typingAttributes
         setAttributedText(text, cursorLocation: mentionRange!.location + encodedMentionString.length)
         view?.m_typingAttributes = typingAttributes
@@ -661,14 +661,14 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         view?.m_attributedText?.enumerateAttribute(MentionAttributes.UserId, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
             guard let value = value as? Int else { return }
 
-            if let length = self.mentionCache[value] where length != range.length + 1 {
+            if let length = self.lengthOfMentionPerId[value] where length != range.length + 1 {
                 removedMentionIds.insert(value)
                 self.deleteMention(inRange: range)
             }
         }
 
         for mentionId in removedMentionIds {
-            self.mentionCache.removeValueForKey(mentionId)
+            self.lengthOfMentionPerId.removeValueForKey(mentionId)
         }
 
         // When typing a character immediately adjacent to or within the range of a mention, the character will automatically be given the styling of a mention (text color and font).

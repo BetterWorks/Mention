@@ -565,8 +565,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         for match in matches {
             // Match must be contained in the text the user most recently changed
             if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
-                let queryLength = recentCharacterRange.location - match.range.location + 1
-                mentionRange = NSRange(location: match.range.location, length: queryLength)
+                mentionRange = NSRange(location: match.range.location, length: match.range.length)
                 query = string.substringWithRange(mentionRange!) as NSString
                 query = query?.substringFromIndex(1)
             }

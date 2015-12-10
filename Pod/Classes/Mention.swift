@@ -465,6 +465,9 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     func textChanged() {
         guard let text = view?.m_text else { return }
 
+        // Delete mentions if either of the following conditions are met:
+        // 1. A character in the mention was deleted
+        // 2. A character was added within the range of the mention
         var removedMentionIds = Set<Int>()
         view?.m_attributedText?.enumerateAttribute(MentionAttributes.UserId, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
             guard let value = value as? Int else { return }
@@ -479,6 +482,8 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             self.mentionCache.removeValueForKey(mentionId)
         }
 
+        // When typing a character immediately adjacent to or within the range of a mention, the character will automatically be given the styling of a mention (text color and font).
+        // Here we restore that character to the non-mention styling.
         guard let updatedTextLength = view?.m_text.characters.count else { return }
         var rangeToUpdate: NSRange?
         view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: updatedTextLength), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
@@ -495,6 +500,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             setAttributedText(mutableString, cursorLocation: recentCharacterRange.location + 1)
         }
 
+        // Check for a mention query
         if let query = mentionQuery(fromString: text) {
             delegate?.usersMatchingQuery(query as String) { [weak self] (users) -> Void in
                 if let users = users {

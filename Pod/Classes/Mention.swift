@@ -403,6 +403,7 @@ extension UITextField: CharacterFinder {
         return charIndex
     }
 }
+
 // MARK: - Mention Composition
 
 public protocol MentionUserType {

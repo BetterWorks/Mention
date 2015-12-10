@@ -511,8 +511,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         }
         else {
             userNameMatches.removeAll()
-            tableView?.reloadData()
-            tableView?.hidden = true
+            refreshTableView()
         }
 
         if userNameMatches.count > 0 {

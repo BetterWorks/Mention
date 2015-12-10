@@ -408,13 +408,20 @@ extension UITextField: CharacterFinder {
 public protocol MentionUserType {
     var name: String { get }
     var id: Int { get }
+
+    func encodedNameForAPI() -> String
+}
+
+public extension MentionUserType {
+    func encodedNameForAPI() -> String {
+        return "@\(name)"
+    }
 }
 
 extension MentionUserType {
     func encodedAttributedString() -> NSAttributedString {
-        let encodedString = "@\(name)"
         let attributedString = NSMutableAttributedString(string: name, attributes: [
-            MentionAttributes.Encoded : encodedString,
+            MentionAttributes.Encoded : encodedNameForAPI(),
             MentionAttributes.Name: name,
             MentionAttributes.UserId : id,
             ])

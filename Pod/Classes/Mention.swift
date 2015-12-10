@@ -162,6 +162,7 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
 
     - returns: An instance of MentionDecoder
     */
+    
     public init(view: T, delegate: MentionTapHandlerDelegate?) {
         self.view = view
 
@@ -173,19 +174,11 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
     }
 
     /**
-     Given a String, MentionDecoder replaces all instances of @mention with an NSAttributedString showing just the user name.
-     The user id is encoded in the MentionAttributes.UserId attribute.
-     The following custom attributes are set on @mention strings:
-
-     MentionAttribute : true
-     MentionAttributes.UserId: decoded user id as a string
-
-     - parameter string: A String that may contain @mention substrings.
-
-     - returns: An instance of NSAttributedString.
-     */
-    private mutating func decode() {
-        let mutableDecodedString = view.defaultAttributedText.mutableCopy() as! NSMutableAttributedString
+    Find all instances of @mentions within the view and replace them with a human readable mention
+    */
+    public mutating func decode() {
+        let startingAttributedString = view.m_attributedText ?? view.defaultAttributedText
+        let mutableDecodedString = NSMutableAttributedString(attributedString: startingAttributedString)
         let string = mutableDecodedString.string
 
         let regex = try? NSRegularExpression(pattern: Pattern, options: .CaseInsensitive)

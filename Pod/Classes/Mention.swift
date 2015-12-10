@@ -439,7 +439,7 @@ public protocol MentionComposerDelegate: class {
     func usersMatchingQuery(query: String, handler: MentionUserClosure)
 }
 
-public protocol MentionUserCell {
+public protocol MentionUserCell: class {
     var mentionUser: MentionUserType? { get set }
 }
 
@@ -502,9 +502,19 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         return ids
     }
 
+    /// A custom `UINib` to be used by `tableView`.
+    /// - note: Do not set in conjunction with `cellClass`
     public var nib: UINib? {
         didSet {
             tableView?.registerNib(nib, forCellReuseIdentifier: MentionCellIdentifier)
+        }
+    }
+
+    /// A custom `UITableViewCell` class to be used by `tableView`.
+    /// - note: Do not set in conjunction with `nib`
+    public var cellClass: MentionUserCell.Type? {
+        didSet {
+            tableView?.registerClass(cellClass, forCellReuseIdentifier: MentionCellIdentifier)
         }
     }
 
@@ -538,7 +548,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     }
 
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as? MentionUserCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(MentionCellIdentifier, forIndexPath: indexPath) as? MentionUserCell
         let user = userNameMatches[indexPath.row]
         cell?.mentionUser = user
 

@@ -420,7 +420,7 @@ public extension MentionUserType {
 }
 
 extension MentionUserType {
-    func encodedAttributedString() -> NSAttributedString {
+    var humanReadableMentionString: NSAttributedString {
         let attributedString = NSMutableAttributedString(string: name, attributes: [
             MentionAttributes.Encoded : encodedNameForAPI(),
             MentionAttributes.Name: name,
@@ -601,7 +601,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
             else { return }
 
         let text = NSMutableAttributedString(attributedString: attributedText)
-        let encodedMentionString = NSMutableAttributedString(attributedString: user.encodedAttributedString())
+        let encodedMentionString = NSMutableAttributedString(attributedString: user.humanReadableMentionString)
         encodedMentionString.addAttributes([NSFontAttributeName : font, NSForegroundColorAttributeName : MentionColor], range: NSRange(location: 0, length: encodedMentionString.length))
         text.replaceCharactersInRange(mentionRange!, withAttributedString: encodedMentionString)
         lengthOfMentionPerId[user.id] = encodedMentionString.length

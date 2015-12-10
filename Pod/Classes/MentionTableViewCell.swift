@@ -13,7 +13,7 @@ class MentionTableViewCell: UITableViewCell, MentionUserCell {
     @IBOutlet private weak var userNameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!
     
-    var mentionUser: MentionUser? {
+    var mentionUser: MentionUserType? {
         didSet {
             setup()
         }
@@ -31,7 +31,7 @@ class MentionTableViewCell: UITableViewCell, MentionUserCell {
     }
     
     func setup() {
-        userNameLabel?.text = mentionUser!.name
+        userNameLabel?.text = mentionUser?.name
 //        userImageView.setImageFromURL(mentionUser!.imageURL, styleActivityIndicator: .Gray)
     }
     

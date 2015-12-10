@@ -405,22 +405,12 @@ extension UITextField: CharacterFinder {
 }
 // MARK: - Mention Composition
 
-/**
-*  MentionUser is a lightweight, generic model object intended to be the primary way of
-*  providing MentionComposer classes with a list of users and their attributes.
-*/
-public class MentionUser: NSObject {
+public protocol MentionUserType {
+    var name: String { get }
+    var id: Int { get }
+}
 
-    public var name: String
-    public var id: Int
-    public var userInfo: [NSObject : AnyObject]?
-
-    public init(name: String, id: Int, userInfo: [NSObject : AnyObject]? = nil) {
-        self.name = name
-        self.id = id
-        self.userInfo = userInfo
-    }
-
+extension MentionUserType {
     func encodedAttributedString() -> NSAttributedString {
         let encodedString = "@\(name)"
         let attributedString = NSMutableAttributedString(string: name, attributes: [
@@ -442,10 +432,10 @@ public protocol MentionComposerDelegate: class {
 }
 
 public protocol MentionUserCell {
-    var mentionUser: MentionUser? { get set }
+    var mentionUser: MentionUserType? { get set }
 }
 
-public typealias MentionUserClosure = (users: [MentionUser]?) -> Void
+public typealias MentionUserClosure = (users: [MentionUserType]?) -> Void
 
 public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UIGestureRecognizerDelegate, UITableViewDelegate, UITableViewDataSource {
 
@@ -460,7 +450,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var mentionRange: NSRange?
     private var tapRecognizer: UITapGestureRecognizer!
     private let originalTextColor: UIColor
-    private var userNameMatches = [MentionUser]()
+    private var userNameMatches = [MentionUserType]()
 
     private var lengthOfMentionPerId = [Int : Int]()
 
@@ -606,7 +596,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         textChanged()
     }
 
-    private func injectMention(forUser user: MentionUser) {
+    private func injectMention(forUser user: MentionUserType) {
         guard let attributedText = view?.m_attributedText,
             font = view?.m_font
             else { return }

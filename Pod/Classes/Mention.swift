@@ -453,6 +453,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private var userNameMatches = [MentionUserType]()
     private var lengthOfMentionPerId = [Int : Int]()
 
+    /// Returns the range of the most recently typed character
     private var recentCharacterRange: NSRange {
         guard let
             beginning = view?.beginningOfDocument,

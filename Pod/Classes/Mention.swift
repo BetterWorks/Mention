@@ -492,7 +492,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         if let range = rangeToUpdate {
             let mutableString = NSMutableAttributedString(attributedString: self.view!.m_attributedText!)
             mutableString.addAttribute(NSForegroundColorAttributeName, value: self.originalTextColor, range: range)
-            self.view?.m_attributedText = mutableString
+            setAttributedText(mutableString, cursorLocation: recentCharacterRange.location + 1)
         }
 
         if let query = mentionQuery(fromString: text) {

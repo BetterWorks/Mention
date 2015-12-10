@@ -8,8 +8,6 @@
 
 import Foundation
 
-// MARK: - MentionController
-
 /**
 *  The NSAttributesString attributes used to encode and decode @mentions
 */
@@ -139,69 +137,39 @@ extension AttributedTextContainingView {
     }
 }
 
-///  The MentionController class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
-///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionController.
-///  Note: MentionController is built to be compatible objective C.
-public class MentionController<T: UIView where T: AttributedTextContainingView>: NSObject, MentionTapHandlerDelegate {
+// MARK: - Decoding
+
+// MARK: - MentionDecoder
+
+///  The MentionDecoder class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
+///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionDecoder.
+///  Note: MentionDecoder is built to be compatible objective C.
+public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
+
+    private let Pattern         = "\\[\\\(MentionCharacter).+?\\:[0-9]+\\]"
+    private let UserIdSignifier = ":"
 
     var view: AttributedTextContainingView
-    weak var delegate: MentionTapHandlerDelegate?
     private var tapHandler: MentionTapHandler<T>!
-    private let mentionDecoder: MentionDecoder
 
     // MARK: Init
 
     /**
-    Public initializer for MentionController.
+    Public initializer for MentionDecoder.
 
     - parameter view:     A `UIView` that conforms to `AttributedTextContainingView` and `CharacterFinder`
     - parameter delegate: An object that conforms to MentionTapHandlerDelegate
 
-    - returns: An instance of MentionController
+    - returns: An instance of MentionDecoder
     */
-    public convenience init(view: T, delegate: MentionTapHandlerDelegate?) {
-        self.init(view: view, inputString: view.defaultAttributedText, delegate: delegate)
-    }
-
-    private init(view: T, inputString: NSAttributedString, delegate: MentionTapHandlerDelegate?) {
+    public init(view: T, delegate: MentionTapHandlerDelegate?) {
         self.view = view
-        self.delegate = delegate
-        self.mentionDecoder = MentionDecoder(attributedString: inputString, font: view.m_font)
-        super.init()
 
         // Decode
-        let attributedStringWithMentions = mentionDecoder.decode()
-
-        // Set Attributed Text
-        self.view.m_attributedText = attributedStringWithMentions
+        decode()
 
         // Handle Taps
-        tapHandler = MentionTapHandler(view: view, delegate: self)
-    }
-
-    // MARK: MentionTapHandlerDelegate
-
-    public func userTappedWithId(id: String) {
-        delegate?.userTappedWithId(id)
-    }
-}
-
-// MARK: - Decoding
-
-/**
- *  A MentionDecoder instance finds occurences of @mentions in a string and converts them to regular text
- */
-struct MentionDecoder {
-
-    var pattern         = "\\[\\@.+?\\:[0-9]+\\]"
-    let tagColor        = MentionColor
-    let userIdSignifier = ":"
-    let attributedString: NSAttributedString
-    let tagFont: UIFont
-
-    init(attributedString: NSAttributedString, font: UIFont) {
-        self.attributedString = attributedString
-        self.tagFont = font
+        tapHandler = MentionTapHandler(view: view, delegate: delegate)
     }
 
     /**
@@ -216,11 +184,11 @@ struct MentionDecoder {
 
      - returns: An instance of NSAttributedString.
      */
-    func decode() -> NSAttributedString {
-        let mutableDecodedString = attributedString.mutableCopy() as! NSMutableAttributedString
-        let string = attributedString.string
+    private mutating func decode() {
+        let mutableDecodedString = view.defaultAttributedText.mutableCopy() as! NSMutableAttributedString
+        let string = mutableDecodedString.string
 
-        let regex = try? NSRegularExpression(pattern: pattern, options: .CaseInsensitive)
+        let regex = try? NSRegularExpression(pattern: Pattern, options: .CaseInsensitive)
         let range = NSRange(location: 0, length: string.characters.count)
         if let matches = regex?.matchesInString(string as String, options: .ReportCompletion, range: range) {
             // keeps track of range changes in mutableDecodedString due to replacements
@@ -232,7 +200,7 @@ struct MentionDecoder {
                 matchRange.location += offset
                 if let mention = regex?.replacementStringForResult(match, inString: mutableDecodedString.string, offset: offset, template: "$0") {
                     // Find the user id signifier
-                    if let userSignifierRange = mention.rangeOfString(userIdSignifier) {
+                    if let userSignifierRange = mention.rangeOfString(UserIdSignifier) {
                         // Find the user id
                         let userIdRange = Range(start: userSignifierRange.startIndex.advancedBy(1), end: userSignifierRange.startIndex.advancedBy(userSignifierRange.startIndex.distanceTo(mention.endIndex) - 1))
                         let userId = mention.substringWithRange(userIdRange)
@@ -242,7 +210,7 @@ struct MentionDecoder {
                         let userName = mention.substringWithRange(userNameRange)
 
                         // Replace the mention with the user name as an attributed string
-                        let attributedMention = NSAttributedString(string: userName, attributes: [MentionAttributes.UserId : userId, NSForegroundColorAttributeName : tagColor, NSFontAttributeName : tagFont])
+                        let attributedMention = NSAttributedString(string: userName, attributes: [MentionAttributes.UserId : userId, NSForegroundColorAttributeName : MentionColor, NSFontAttributeName : view.m_font])
                         mutableDecodedString.replaceCharactersInRange(matchRange, withAttributedString: attributedMention)
 
                         // Offset the difference between the length of the replacement string and the original range of the regex match
@@ -251,8 +219,8 @@ struct MentionDecoder {
                 }
             }
         }
-
-        return NSAttributedString(attributedString: mutableDecodedString)
+        
+        self.view.m_attributedText = NSAttributedString(attributedString: mutableDecodedString)
     }
 }
 
@@ -277,7 +245,7 @@ class MentionTapHandler<T: UIView where T: AttributedTextContainingView>: NSObje
     var tapRecognizer: UITapGestureRecognizer!
     weak var delegate: MentionTapHandlerDelegate?
 
-    init<T: UIView where T: AttributedTextContainingView>(view: T, delegate: MentionTapHandlerDelegate) {
+    init<T: UIView where T: AttributedTextContainingView>(view: T, delegate: MentionTapHandlerDelegate?) {
         super.init()
         self.delegate = delegate
         tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")
@@ -406,6 +374,8 @@ extension UITextField: CharacterFinder {
 
 // MARK: - Mention Composition
 
+// MARK: - MentionUserType
+
 public protocol MentionUserType {
     var name: String { get }
     var id: Int { get }
@@ -430,6 +400,8 @@ extension MentionUserType {
         return attributedString as NSAttributedString
     }
 }
+
+// MARK: - MentionComposer
 
 /**
  *  The primary purpose MentionComposerDelegate is to provide the list of users matching an @mention query.

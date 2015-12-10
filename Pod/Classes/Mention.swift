@@ -560,25 +560,17 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     private func mentionQuery(fromString string: NSString) -> NSString? {
         var query: NSString?
-
-        do {
-            let regex = try NSRegularExpression(pattern: MentionRegexString, options: .CaseInsensitive)
-
-            let range = NSRange(location: 0, length: string.length)
-
-            let matches = regex.matchesInString(string as String, options: .ReportCompletion, range: range)
-
-            for match in matches {
-                // Match must be contained in the text the user most recently changed
-                if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
-                    let queryLength = recentCharacterRange.location - match.range.location + 1
-                    mentionRange = NSRange(location: match.range.location, length: queryLength)
-                    query = string.substringWithRange(mentionRange!) as NSString
-                    query = query?.substringFromIndex(1)
-                }
+        guard let regex = try? NSRegularExpression(pattern: MentionRegexString, options: .CaseInsensitive) else { return query }
+        let range = NSRange(location: 0, length: string.length)
+        let matches = regex.matchesInString(string as String, options: .ReportCompletion, range: range)
+        for match in matches {
+            // Match must be contained in the text the user most recently changed
+            if NSIntersectionRange(match.range, recentCharacterRange).length > 0 {
+                let queryLength = recentCharacterRange.location - match.range.location + 1
+                mentionRange = NSRange(location: match.range.location, length: queryLength)
+                query = string.substringWithRange(mentionRange!) as NSString
+                query = query?.substringFromIndex(1)
             }
-        } catch {
-            print("could not create regex!")
         }
 
         return query

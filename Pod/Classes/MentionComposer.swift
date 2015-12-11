@@ -245,9 +245,10 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         // When typing a character immediately adjacent to or within the range of a mention, the character will automatically be given the styling of a mention (text color and font).
         // Here we restore that character to the non-mention styling.
         var rangeToUpdate: NSRange?
-        view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: text.characters.count), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
+        guard let updatedCharacterCount = view?.m_text.characters.count else { return }
+        view?.m_attributedText?.enumerateAttribute(NSForegroundColorAttributeName, inRange: NSRange(location: 0, length: updatedCharacterCount), options: NSAttributedStringEnumerationOptions(rawValue: 0)) { (value, range, stop) -> Void in
             guard let color = value as? UIColor where color == MentionColor else { return }
-            var effectiveRange = NSRange(location: 0, length: 20)
+            var effectiveRange = NSRange(location: 0, length: 0)
             guard let attributes = self.view?.m_attributedText?.attributesAtIndex(range.location, effectiveRange: &effectiveRange) where !attributes.keys.contains(MentionAttributes.Encoded) else { return }
             rangeToUpdate = effectiveRange
             stop.memory = true

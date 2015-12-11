@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9060" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <objects>
@@ -12,44 +12,24 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dvM-wK-35w">
-                        <rect key="frame" x="48" y="12" width="264" height="20"/>
-                        <animations/>
+                        <rect key="frame" x="8" y="12" width="304" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="baL-BF-gFF">
-                        <rect key="frame" x="8" y="7" width="30" height="30"/>
-                        <animations/>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="30" id="0gH-fV-vjx"/>
-                            <constraint firstAttribute="width" constant="30" id="zIw-XX-35R"/>
-                        </constraints>
-                    </imageView>
                 </subviews>
-                <animations/>
                 <constraints>
                     <constraint firstAttribute="bottomMargin" secondItem="dvM-wK-35w" secondAttribute="bottom" constant="3.5" id="Js7-2m-RWT"/>
-                    <constraint firstItem="baL-BF-gFF" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="Ksc-1V-ixQ"/>
                     <constraint firstItem="dvM-wK-35w" firstAttribute="trailing" secondItem="H2p-sc-9uM" secondAttribute="trailingMargin" id="LDe-Es-XxS"/>
-                    <constraint firstItem="dvM-wK-35w" firstAttribute="leading" secondItem="baL-BF-gFF" secondAttribute="trailing" constant="10" id="MNw-PZ-FMe"/>
-                    <constraint firstAttribute="bottomMargin" secondItem="baL-BF-gFF" secondAttribute="bottom" constant="-2" id="Nab-x1-aq3"/>
-                    <constraint firstItem="baL-BF-gFF" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="-1" id="Yon-X7-cyG"/>
+                    <constraint firstAttribute="leadingMargin" secondItem="dvM-wK-35w" secondAttribute="leading" id="YZ6-Bf-ojU"/>
                     <constraint firstItem="dvM-wK-35w" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="4" id="aKg-m6-5Ta"/>
                 </constraints>
-                <variation key="default">
-                    <mask key="constraints">
-                        <exclude reference="Nab-x1-aq3"/>
-                    </mask>
-                </variation>
             </tableViewCellContentView>
-            <animations/>
             <connections>
-                <outlet property="userImageView" destination="baL-BF-gFF" id="lre-5E-mpl"/>
                 <outlet property="userNameLabel" destination="dvM-wK-35w" id="vUt-5e-sy0"/>
             </connections>
             <point key="canvasLocation" x="654" y="671"/>

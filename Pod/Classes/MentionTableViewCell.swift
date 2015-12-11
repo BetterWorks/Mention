@@ -11,33 +11,25 @@ import UIKit
 class MentionTableViewCell: UITableViewCell, MentionUserCell {
 
     @IBOutlet private weak var userNameLabel: UILabel!
-    @IBOutlet weak var userImageView: UIImageView!
     
     var mentionUser: MentionUserType? {
         didSet {
-            setup()
+            userNameLabel?.text = mentionUser?.name
         }
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        userImageView.layer.cornerRadius = CGRectGetHeight(userImageView.bounds) / 2
-        userImageView.clipsToBounds = true
         reset()
     }
-    
-    func reset() {
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        reset()
+    }
+
+    private func reset() {
         userNameLabel?.text = nil
-    }
-    
-    func setup() {
-        userNameLabel?.text = mentionUser?.name
-//        userImageView.setImageFromURL(mentionUser!.imageURL, styleActivityIndicator: .Gray)
-    }
-    
-    override func setHighlighted(highlighted: Bool, animated: Bool) {
-//        contentView.backgroundColor = highlighted ? UIColor.betterWorksBlue() : UIColor.whiteColor()
-//        userNameLabel.textColor = highlighted ? UIColor.whiteColor() : UIColor.betterWorksDarkTextColor()
     }
     
 }

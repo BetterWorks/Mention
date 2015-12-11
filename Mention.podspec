@@ -20,11 +20,11 @@ Pod::Spec.new do |s|
 "A small, efficient library to handle displaying, and composing @mentions, as well as handling when the user taps them. Supports UILabel, UITextField, and UITextView. Why reinvent the wheel?"
                        DESC
 
-  s.homepage         = "https://github.com/cmds4410/Mention"
+  s.homepage         = "https://github.com/BetterWorks/Mention"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Connor Smith" => "cmds4410@gmail.com" }
-  s.source           = { :git => "https://github.com/cmds4410/Mention.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/BetterWorks/Mention.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/FlghtOfThCondor'
 
   s.platform     = :ios, '8.0'

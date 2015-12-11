@@ -6,9 +6,7 @@
 //
 //
 
-/**
- *  MentionTapHandlerDelegate defines functions for handling taps on @mention and #hashtag substrings.
- */
+/// MentionTapHandlerDelegate defines functions for handling taps on @mention and #hashtag substrings.
 public protocol MentionTapHandlerDelegate: class {
     /**
      This method is called when the user taps an @mention string.

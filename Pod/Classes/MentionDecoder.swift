@@ -8,9 +8,11 @@
 
 // MARK: - MentionDecoder
 
-///  The MentionDecoder class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
-///  To handle user taps on an @mentioin or #hashtag you must conform to the MentionTapHandlerDelegate protocol and set the delegate on MentionDecoder.
-///  Note: MentionDecoder is built to be compatible objective C.
+/**
+The MentionDecoder class provides a simple interface for rendering @mentions and #hashtag comments on UILabel, UITextField, and UITextView.
+
+To handle user taps on an @mentioin you must conform to the `MentionTapHandlerDelegate` protocol and set the delegate on `MentionDecoder`.
+*/
 public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
 
     private let Pattern         = "\\[\\\(MentionCharacter).+?\\:[0-9]+\\]"

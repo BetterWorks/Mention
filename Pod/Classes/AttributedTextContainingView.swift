@@ -9,8 +9,8 @@
 // MARK: AttributedTextContainingView
 
 /**
- *  AttributedTextContainingView provides a single interface for text-containing views
- */
+*  AttributedTextContainingView provides a single interface for text-containing views
+*/
 public protocol AttributedTextContainingView: CharacterFinder {
     var m_text: String { get }
     var m_attributedText: NSAttributedString? { get set }

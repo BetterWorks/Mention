@@ -6,8 +6,9 @@
 //
 //
 
-// MARK: - MentionUserType
-
+/**
+*  MentionUserType defines a protocol for model objects compatible with `MentionComposer`
+*/
 public protocol MentionUserType {
     var name: String { get }
     var id: Int { get }

@@ -6,20 +6,19 @@
 //
 //
 
-/**
- *  The primary purpose MentionComposerDelegate is to provide the list of users matching an @mention query.
- *  Because TextViewMentionComposer relies on the UITextViewDelegate callbacks, it forwards all of them onto the MentionComposerDelegate.
- */
+/// The primary purpose `MentionComposerDelegate` is to provide the list of users matching an @mention query.
 public protocol MentionComposerDelegate: class {
     func usersMatchingQuery(query: String, handler: MentionUserClosure)
 }
 
+/// Defines a protocol for cells that have a property of type `MentionUserType`
 public protocol MentionUserCell: class {
     var mentionUser: MentionUserType? { get set }
 }
 
 public typealias MentionUserClosure = (users: [MentionUserType]?) -> Void
 
+/// Use MentionComposer to compose @mentions in any `UIView` that conforms to `ComposableAttributedTextContainingView`
 public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UITableViewDelegate, UITableViewDataSource {
 
     private let MentionCellIdentifier = "MentionCellReuseIdentifier"

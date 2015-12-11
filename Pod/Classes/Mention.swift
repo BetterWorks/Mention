@@ -150,7 +150,7 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
     private let UserIdSignifier = ":"
 
     var view: AttributedTextContainingView
-    private var tapHandler: MentionTapHandler<T>!
+    private var tapHandler: MentionTapHandler<T>
 
     // MARK: Init
 
@@ -162,15 +162,14 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
 
     - returns: An instance of MentionDecoder
     */
-    
     public init(view: T, delegate: MentionTapHandlerDelegate?) {
         self.view = view
 
-        // Decode
-        decode()
-
         // Handle Taps
         tapHandler = MentionTapHandler(view: view, delegate: delegate)
+
+        // Decode
+        decode()
     }
 
     /**

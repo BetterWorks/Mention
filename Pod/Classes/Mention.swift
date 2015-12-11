@@ -174,6 +174,7 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
 
     /**
     Find all instances of @mentions within the view and replace them with a human readable mention
+    - Note: This funciton is invoked during init
     */
     public mutating func decode() {
         let startingAttributedString = view.m_attributedText ?? view.defaultAttributedText

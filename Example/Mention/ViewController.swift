@@ -7,18 +7,28 @@
 //
 
 import UIKit
+import Mention
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var textView: UITextView!
+    @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var tableView: UITableView!
+
+    private var textFieldMentionComposer: MentionComposer<UITextField>?
+    private var textViewMentionComposer: MentionComposer<UITextView>?
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        textFieldMentionComposer = MentionComposer<UITextField>(view: textField, searchResultsTableView: tableView, delegate: self)
+//        textViewMentionComposer = MentionComposer<UITextView>(view: textView, searchResultsTableView: tableView, delegate: self)
     }
 
 }
 
+extension ViewController: MentionComposerDelegate {
+    func usersMatchingQuery(query: String, handler: MentionUserClosure) {
+        handler(users: [MentionUser(name: "test user", id: 0, imageURL: nil)])
+    }
+}

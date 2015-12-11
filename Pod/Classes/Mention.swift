@@ -213,7 +213,7 @@ public struct MentionDecoder<T: UIView where T: AttributedTextContainingView> {
             }
         }
         
-        self.view.m_attributedText = NSAttributedString(attributedString: mutableDecodedString)
+        view.m_attributedText = NSAttributedString(attributedString: mutableDecodedString)
     }
 }
 

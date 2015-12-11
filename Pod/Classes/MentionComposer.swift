@@ -3,7 +3,7 @@
 //  Pods
 //
 //  Created by Connor Smith on 12/10/15.
-//
+//  Copyright (c) 2015 BetterWorks. All rights reserved.
 //
 
 /// The primary purpose `MentionComposerDelegate` is to provide the list of users matching an @mention query.

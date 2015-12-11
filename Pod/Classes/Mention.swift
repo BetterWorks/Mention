@@ -410,7 +410,7 @@ public protocol MentionUserCell: class {
 
 public typealias MentionUserClosure = (users: [MentionUserType]?) -> Void
 
-public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UIGestureRecognizerDelegate, UITableViewDelegate, UITableViewDataSource {
+public class MentionComposer<T: UIView where T: ComposableAttributedTextContainingView>: NSObject, UITableViewDelegate, UITableViewDataSource {
 
     private let MentionCellIdentifier = "MentionCellReuseIdentifier"
     private var MentionRegexString: String {
@@ -421,7 +421,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     var tableView: UITableView?
     weak var delegate: MentionComposerDelegate?
     private var mentionRange = NSRange(location: 0, length: 0)
-    private var tapRecognizer: UITapGestureRecognizer!
     private let originalTextColor: UIColor
     private var userNameMatches = [MentionUserType]()
     private var lengthOfMentionPerId = [Int : Int]()
@@ -493,11 +492,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         tableView.delegate = self
         tableView.dataSource = self
         tableView.registerNib(UINib(nibName: "MentionTableViewCell", bundle: NSBundle(forClass: MentionTableViewCell.self)), forCellReuseIdentifier: MentionCellIdentifier)
-        tapRecognizer = UITapGestureRecognizer(target: self, action: "tableViewTapped:")
-        tapRecognizer.delegate = self
-        tapRecognizer.cancelsTouchesInView = false
-        tapRecognizer.delaysTouchesEnded = false
-        tableView.addGestureRecognizer(tapRecognizer)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextFieldTextDidChangeNotification, object: view)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextViewTextDidChangeNotification, object: view)
     }
@@ -596,23 +590,6 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     private func refreshTableView() {
         tableView?.reloadData()
         tableView?.hidden = userNameMatches.count == 0
-    }
-
-    // MARK: UIGestureRecognizerDelegate
-
-    func tableViewTapped(recognizer: UITapGestureRecognizer) {
-        tableView?.becomeFirstResponder()
-    }
-
-    public func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
-        var shouldBegin = true
-        if (gestureRecognizer == tapRecognizer) {
-            if tableView?.isFirstResponder() == true {
-                shouldBegin = false
-            }
-        }
-
-        return shouldBegin
     }
 
     func textChanged() {

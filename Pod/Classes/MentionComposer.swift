@@ -47,10 +47,11 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
     var view: T?
     var tableView: UITableView?
     weak var delegate: MentionComposerDelegate?
-    private var mentionRange = NSRange(location: 0, length: 0)
     private let originalTextColor: UIColor
-    private var userNameMatches = [MentionUserType]()
-    private var lengthOfMentionPerId = [Int : Int]()
+    private var mentionRange           = NSRange(location: 0, length: 0)
+    private var userNameMatches        = [MentionUserType]()
+    private var lengthOfMentionPerId   = [Int : Int]()
+    private var requestingMentionUsers = false
 
     /// Returns the range of the most recently typed character
     private var recentCharacterRange: NSRange {
@@ -119,6 +120,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
         tableView.delegate = self
         tableView.dataSource = self
         tableView.registerNib(UINib(nibName: "MentionTableViewCell", bundle: NSBundle(forClass: MentionTableViewCell.self)), forCellReuseIdentifier: MentionCellIdentifier)
+        refreshTableView()
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextFieldTextDidChangeNotification, object: view)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "textChanged", name: UITextViewTextDidChangeNotification, object: view)
     }
@@ -216,7 +218,7 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
     private func refreshTableView() {
         tableView?.reloadData()
-        tableView?.hidden = userNameMatches.count == 0
+        tableView?.hidden = !requestingMentionUsers && userNameMatches.count == 0
     }
 
     func textChanged() {
@@ -262,14 +264,26 @@ public class MentionComposer<T: UIView where T: ComposableAttributedTextContaini
 
         // Check for a mention query
         if let query = mentionQuery(fromString: text) {
+            requestingMentionUsers = true
+            refreshTableView()
+
             delegate?.usersMatchingQuery(query as String) { [weak self] (users) -> Void in
+                guard self?.requestingMentionUsers == true else { return }
+                
+                self?.requestingMentionUsers = false
+
                 if let users = users {
                     self?.userNameMatches = users
-                    self?.refreshTableView()
                 }
+                else {
+                    self?.userNameMatches.removeAll()
+                }
+
+                self?.refreshTableView()
             }
         }
         else {
+            requestingMentionUsers = false
             userNameMatches.removeAll()
             refreshTableView()
         }
